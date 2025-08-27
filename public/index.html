@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncBeats - Synchronized Music Listening</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .room-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.room {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .player-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .control-item h4 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .playlist {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .playlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f1f3f4;
+            transition: background-color 0.2s ease;
+        }
+
+        .playlist-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .playlist-item:last-child {
+            border-bottom: none;
+        }
+
+        .playlist-item.current {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .upload-section {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .upload-section.dragover {
+            background: #e8f4fd;
+            border-color: #2196f3;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .user-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .player-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* YouTube Section Styles */
+        .youtube-section {
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fff5f5;
+        }
+
+        .youtube-section h3 {
+            color: #ff0000;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .youtube-results {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .youtube-result-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .youtube-result-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .youtube-thumbnail {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+
+        .youtube-info {
+            flex: 1;
+        }
+
+        .youtube-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .youtube-duration {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .youtube-add-btn {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+
+        .youtube-add-btn:hover {
+            background: #cc0000;
+        }
+
+        /* Sharing Section Styles */
+        .share-content {
+            text-align: center;
+        }
+
+        .share-link-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .share-link-container input {
+            flex: 1;
+            background: #f8f9fa;
+            cursor: text;
+        }
+
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .share-options .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Room Status Enhancement */
+        .room-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .room-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-width: 80px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-music"></i> SyncBeats</h1>
+            <p>Listen to music together with your friends during calls</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Connection & Room Management -->
+            <div class="card">
+                <h2><i class="fas fa-users"></i> Room Management</h2>
+                
+                <div class="room-section">
+                    <div class="input-group">
+                        <label for="roomId">Room ID:</label>
+                        <input type="text" id="roomId" placeholder="Enter room ID (e.g., party123)">
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn" id="joinRoomBtn">
+                            <i class="fas fa-sign-in-alt"></i> Join Room
+                        </button>
+                        <button class="btn btn-secondary" id="leaveRoomBtn" style="display: none;">
+                            <i class="fas fa-sign-out-alt"></i> Leave Room
+                        </button>
+                    </div>
+                </div>
+
+                <div id="connectionStatus" class="status disconnected">
+                    <i class="fas fa-times-circle"></i> Disconnected
+                </div>
+
+                <div id="roomStatus" class="status room hidden">
+                    <div class="room-info">
+                        <div>
+                            <i class="fas fa-users"></i> Connected to room: <span id="currentRoom"></span>
+                        </div>
+                        <button class="btn btn-secondary" id="shareRoomBtn" style="display: none;">
+                            <i class="fas fa-share-alt"></i> Share Room
+                        </button>
+                    </div>
+                    <div class="room-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="userCount">0</div>
+                            <div class="stat-label">Users</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="trackCount">0</div>
+                            <div class="stat-label">Tracks</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="userList" class="hidden">
+                    <h3>Users in Room:</h3>
+                    <div class="user-list" id="userListContent"></div>
+                </div>
+            </div>
+
+            <!-- Music Player -->
+            <div class="card">
+                <h2><i class="fas fa-play-circle"></i> Music Player</h2>
+                
+                <div id="playerSection" class="hidden">
+                    <div class="player-controls">
+                        <div class="control-item">
+                            <h4>Playback</h4>
+                            <div class="btn-group">
+                                <button class="btn btn-success" id="playBtn">
+                                    <i class="fas fa-play"></i> Play
+                                </button>
+                                <button class="btn btn-secondary" id="pauseBtn">
+                                    <i class="fas fa-pause"></i> Pause
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="control-item">
+                            <h4>Volume</h4>
+                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100">
+                            <div id="volumeValue">100%</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="seekSlider">Progress:</label>
+                        <input type="range" id="seekSlider" min="0" max="100" value="0" step="0.1">
+                        <div id="timeDisplay">00:00 / 00:00</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="currentTrack">Current Track:</label>
+                        <div id="currentTrack" style="padding: 10px; background: #f8f9fa; border-radius: 5px; min-height: 20px;">
+                            No track selected
+                        </div>
+                    </div>
+                </div>
+
+                <div id="noRoomMessage">
+                    <p style="text-align: center; color: #6c757d; font-style: italic;">
+                        Join a room to start listening to music together!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playlist & Upload Section -->
+        <div class="card">
+            <h2><i class="fas fa-list"></i> Playlist & Upload</h2>
+            
+            <div id="playlistSection" class="hidden">
+                <div class="playlist" id="playlist">
+                    <p style="text-align: center; color: #6c757d; font-style: italic;">
+                        No tracks in playlist yet
+                    </p>
+                </div>
+            </div>
+
+            <!-- YouTube Search Section -->
+            <div class="youtube-section" id="youtubeSection">
+                <h3><i class="fab fa-youtube" style="color: #ff0000;"></i> Add from YouTube</h3>
+                <div class="input-group">
+                    <input type="text" id="youtubeSearch" placeholder="Search YouTube videos...">
+                    <button class="btn" id="searchYoutubeBtn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                
+                <div id="youtubeResults" class="youtube-results hidden">
+                    <h4>Search Results:</h4>
+                    <div id="youtubeResultsList"></div>
+                </div>
+            </div>
+
+            <div class="upload-section" id="uploadSection">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea; margin-bottom: 20px;"></i>
+                <h3>Upload Music</h3>
+                <p>Drag and drop audio files here or click to browse</p>
+                <input type="file" id="fileInput" class="file-input" accept="audio/*" multiple>
+                <label for="fileInput" class="upload-btn">
+                    <i class="fas fa-folder-open"></i> Choose Files
+                </label>
+                
+                <div id="uploadProgress" class="hidden">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div id="uploadStatus">Uploading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Sharing Section -->
+        <div class="card" id="sharingSection" style="display: none;">
+            <h2><i class="fas fa-share-alt"></i> Share Room</h2>
+            <div class="share-content">
+                <div class="input-group">
+                    <label>Direct Join Link:</label>
+                    <div class="share-link-container">
+                        <input type="text" id="shareLink" readonly>
+                        <button class="btn btn-secondary" id="copyLinkBtn">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="share-options">
+                    <button class="btn btn-success" id="shareWhatsAppBtn">
+                        <i class="fab fa-whatsapp"></i> Share on WhatsApp
+                    </button>
+                    <button class="btn btn-primary" id="shareTelegramBtn">
+                        <i class="fab fa-telegram"></i> Share on Telegram
+                    </button>
+                    <button class="btn btn-info" id="shareEmailBtn">
+                        <i class="fas fa-envelope"></i> Share via Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="bundle.js"></script>
+</body>
+</html>
