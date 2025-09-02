@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start-new": "node server-new.js",
     "dev": "nodemon server.js",
+    "dev-new": "nodemon server-new.js",
     "build": "webpack --mode production",
     "dev-build": "webpack --mode development --watch"
   },

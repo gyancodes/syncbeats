@@ -8,6 +8,8 @@ class SyncBeats {
     this.currentTrack = null;
     this.playlist = [];
     this.syncInterval = null;
+    this.hasControl = false; // Whether this user can control playback
+    this.isController = false; // Whether this user is the current controller
 
     this.initializeSocket();
     this.bindEvents();
@@ -36,8 +38,9 @@ class SyncBeats {
       this.updateRoomState(roomState);
     });
 
-    this.socket.on("play", (time) => {
-      this.playMusicLocal(time);
+    this.socket.on("play", async (time) => {
+      console.log("Received play event with time:", time);
+      await this.playMusicLocal(time);
     });
 
     this.socket.on("pause", () => {
@@ -60,8 +63,9 @@ class SyncBeats {
       this.addTrackToPlaylist(track);
     });
 
-    this.socket.on("trackChanged", (track) => {
-      this.changeTrack(track);
+    this.socket.on("trackChanged", async (track) => {
+      console.log("Received track change event:", track.name);
+      await this.changeTrack(track);
     });
 
     this.socket.on("trackRemoved", (data) => {
@@ -74,6 +78,15 @@ class SyncBeats {
 
     this.socket.on("syncTime", (time) => {
       this.syncTime(time);
+    });
+
+    // Control system events
+    this.socket.on("controllerChanged", (data) => {
+      this.updateControlStatus(data);
+    });
+
+    this.socket.on("controlDenied", (data) => {
+      this.showControlDeniedMessage(data.message);
     });
 
     // YouTube events
@@ -258,10 +271,19 @@ class SyncBeats {
       return;
     }
 
-    try {
-      // Only emit to room if this is the initiator (not receiving from server)
-      const shouldEmit = this.currentRoom && time === null;
+    // Check if this is a user-initiated action (not from server sync)
+    const isUserAction = time === null;
 
+    // If user action, check if they have control or need to request it
+    if (isUserAction && this.currentRoom) {
+      if (!this.isController) {
+        // Request control first
+        this.socket.emit("requestControl", this.currentRoom);
+        return;
+      }
+    }
+
+    try {
       // Ensure audio is loaded and ready
       if (this.audio.readyState < 2) {
         await new Promise((resolve, reject) => {
@@ -291,8 +313,8 @@ class SyncBeats {
       this.updatePlayButton();
       this.startSyncInterval();
 
-      // Only emit to other users if this user initiated the play
-      if (shouldEmit) {
+      // Only emit to other users if this user initiated the play and has control
+      if (isUserAction && this.isController && this.currentRoom) {
         this.socket.emit("play", this.currentRoom);
       }
     } catch (error) {
@@ -304,12 +326,20 @@ class SyncBeats {
   }
 
   pauseMusic() {
+    // Check if user has control
+    if (this.currentRoom && !this.isController) {
+      // Request control first
+      this.socket.emit("requestControl", this.currentRoom);
+      return;
+    }
+
     this.audio.pause();
     this.isPlaying = false;
     this.updatePlayButton();
     this.stopSyncInterval();
 
-    if (this.currentRoom) {
+    // Only emit if user has control
+    if (this.currentRoom && this.isController) {
       this.socket.emit("pause", this.currentRoom);
     }
   }
@@ -328,38 +358,76 @@ class SyncBeats {
     }
 
     try {
-      // Ensure audio is loaded and ready
+      console.log("Playing locally:", this.currentTrack.name, "at time:", time);
+      
+      // Ensure audio source is set
+      if (this.audio.src !== this.currentTrack.url) {
+        console.log("Setting audio source:", this.currentTrack.url);
+        this.audio.src = this.currentTrack.url;
+        this.audio.load();
+      }
+
+      // Wait for audio to be ready
       if (this.audio.readyState < 2) {
+        console.log("Waiting for audio to load...");
         await new Promise((resolve, reject) => {
-          const onCanPlay = () => {
+          const timeout = setTimeout(() => {
             this.audio.removeEventListener("canplay", onCanPlay);
             this.audio.removeEventListener("error", onError);
+            reject(new Error("Audio load timeout"));
+          }, 10000); // 10 second timeout
+
+          const onCanPlay = () => {
+            clearTimeout(timeout);
+            this.audio.removeEventListener("canplay", onCanPlay);
+            this.audio.removeEventListener("error", onError);
+            console.log("Audio loaded successfully");
             resolve();
           };
-          const onError = () => {
+          
+          const onError = (e) => {
+            clearTimeout(timeout);
             this.audio.removeEventListener("canplay", onCanPlay);
             this.audio.removeEventListener("error", onError);
+            console.error("Audio load error:", e);
             reject(new Error("Failed to load audio"));
           };
-          this.audio.addEventListener("canplay", onCanPlay);
-          this.audio.addEventListener("error", onError);
+
+          if (this.audio.readyState >= 2) {
+            clearTimeout(timeout);
+            resolve();
+          } else {
+            this.audio.addEventListener("canplay", onCanPlay);
+            this.audio.addEventListener("error", onError);
+          }
         });
       }
 
       // Set time if specified
       if (time !== null && isFinite(time)) {
+        console.log("Setting audio time to:", time);
         this.audio.currentTime = time;
       }
 
       // Play the audio
+      console.log("Starting audio playback...");
       await this.audio.play();
       this.isPlaying = true;
       this.updatePlayButton();
       this.startSyncInterval();
 
+      console.log("Audio playing successfully");
       // Don't emit to server - this is from server sync
     } catch (error) {
       console.error("Error playing audio locally:", error);
+      
+      // If it's a YouTube track, try to refresh the URL
+      if (this.currentTrack && this.currentTrack.type === "youtube") {
+        console.log("YouTube track error, attempting to refresh URL...");
+        this.refreshYouTubeUrl(this.currentTrack);
+      } else {
+        alert("Error playing audio: " + error.message);
+      }
     }
   }
 
@@ -388,8 +456,10 @@ class SyncBeats {
   }
 
   async changeTrack(track) {
+    console.log("Changing track to:", track.name, "URL:", track.url);
+    
     // Stop current playback first
-    this.pauseMusic();
+    this.pauseMusicLocal(); // Use local pause to avoid server emission
 
     this.currentTrack = track;
 
@@ -397,33 +467,48 @@ class SyncBeats {
       // Set the new source
       this.audio.src = track.url;
       this.updateCurrentTrackDisplay();
+      
+      // Force load the new audio
+      this.audio.load();
 
-      // Wait for the audio to be ready
+      // Wait for the audio to be ready with timeout
       await new Promise((resolve, reject) => {
-        const onCanPlay = () => {
+        const timeout = setTimeout(() => {
           this.audio.removeEventListener("canplaythrough", onCanPlay);
           this.audio.removeEventListener("error", onError);
+          reject(new Error("Track load timeout"));
+        }, 15000); // 15 second timeout
+
+        const onCanPlay = () => {
+          clearTimeout(timeout);
+          this.audio.removeEventListener("canplaythrough", onCanPlay);
+          this.audio.removeEventListener("error", onError);
+          console.log("Track loaded successfully:", track.name);
           resolve();
         };
+        
         const onError = (e) => {
+          clearTimeout(timeout);
           this.audio.removeEventListener("canplaythrough", onCanPlay);
           this.audio.removeEventListener("error", onError);
+          console.error("Track load error:", e);
           reject(e);
         };
 
         if (this.audio.readyState >= 3) {
+          clearTimeout(timeout);
+          console.log("Track already loaded:", track.name);
           resolve();
         } else {
           this.audio.addEventListener("canplaythrough", onCanPlay);
           this.audio.addEventListener("error", onError);
-          this.audio.load();
         }
       });
 
-      console.log("Track loaded successfully:", track.name);
     } catch (error) {
       console.error("Error loading track:", error);
       if (track.type === "youtube") {
+        console.log("Attempting to refresh YouTube URL...");
         this.refreshYouTubeUrl(track);
       } else {
         alert("Error loading track: " + track.name);
@@ -588,18 +673,42 @@ class SyncBeats {
     }
   }
 
-  updateRoomState(roomState) {
+  async updateRoomState(roomState) {
+    console.log("Updating room state:", roomState);
+    
     this.playlist = roomState.playlist || [];
-    this.currentTrack = roomState.currentTrack;
     this.isPlaying = roomState.isPlaying;
-    this.audio.volume = roomState.volume;
+    this.audio.volume = roomState.volume || 1;
+
+    // Update control status
+    this.isController = roomState.controller === this.socket.id;
+    this.hasControl = roomState.controller !== null;
 
     this.updatePlaylistDisplay();
-    this.updateCurrentTrackDisplay();
     this.updateVolumeDisplay();
+    
+    // Update control status UI
+    this.updateControlStatus({
+      controller: roomState.controller,
+      isYou: this.isController
+    });
 
-    if (this.currentTrack) {
-      this.loadAudio();
+    // Handle current track change
+    if (roomState.currentTrack && 
+        (!this.currentTrack || this.currentTrack.id !== roomState.currentTrack.id)) {
+      console.log("Room has different current track, changing to:", roomState.currentTrack.name);
+      await this.changeTrack(roomState.currentTrack);
+    } else if (this.currentTrack) {
+      this.updateCurrentTrackDisplay();
+    }
+
+    // Sync playback state
+    if (roomState.isPlaying && !this.isPlaying && this.currentTrack) {
+      console.log("Room is playing, starting local playback");
+      await this.playMusicLocal(roomState.currentTime);
+    } else if (!roomState.isPlaying && this.isPlaying) {
+      console.log("Room is paused, pausing local playback");
+      this.pauseMusicLocal();
     }
   }
 
@@ -928,6 +1037,64 @@ class SyncBeats {
     if (this.currentRoom) {
       document.getElementById("userCount").textContent = userCount;
     }
+  }
+
+  updateControlStatus(data) {
+    this.isController = data.isYou;
+    this.hasControl = data.controller !== null;
+
+    // Update UI to show control status
+    const controlStatus = document.getElementById("controlStatus");
+    const playBtn = document.getElementById("playBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+
+    if (!controlStatus) {
+      // Create control status element if it doesn't exist
+      const statusElement = document.createElement("div");
+      statusElement.id = "controlStatus";
+      statusElement.className = "control-status";
+      document.getElementById("playerControls").appendChild(statusElement);
+    }
+
+    if (data.isYou) {
+      document.getElementById("controlStatus").innerHTML = 
+        '<i class="fas fa-crown"></i> You have control';
+      document.getElementById("controlStatus").className = "control-status has-control";
+      playBtn.disabled = false;
+      pauseBtn.disabled = false;
+    } else if (data.controller) {
+      document.getElementById("controlStatus").innerHTML = 
+        '<i class="fas fa-hand-paper"></i> Another user has control - Click to request';
+      document.getElementById("controlStatus").className = "control-status no-control clickable";
+      document.getElementById("controlStatus").onclick = () => {
+        this.socket.emit("requestControl", this.currentRoom);
+      };
+      playBtn.disabled = true;
+      pauseBtn.disabled = true;
+    } else {
+      document.getElementById("controlStatus").innerHTML = 
+        '<i class="fas fa-play-circle"></i> Click play to take control';
+      document.getElementById("controlStatus").className = "control-status no-control";
+      document.getElementById("controlStatus").onclick = null;
+      playBtn.disabled = false;
+      pauseBtn.disabled = false;
+    }
+  }
+
+  showControlDeniedMessage(message) {
+    // Show a temporary message
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "control-denied-message";
+    messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+    
+    document.body.appendChild(messageDiv);
+    
+    // Remove message after 3 seconds
+    setTimeout(() => {
+      if (messageDiv.parentNode) {
+        messageDiv.parentNode.removeChild(messageDiv);
+      }
+    }, 3000);
   }
 }
 

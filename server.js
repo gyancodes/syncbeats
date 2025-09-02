@@ -68,12 +68,34 @@ io.on("connection", (socket) => {
         playlist: [],
         createdAt: Date.now(),
         creator: socket.id,
+        controller: null, // Who currently controls play/pause
+        lastActionTime: null, // When last control action happened
+        lastActionBy: null, // Who performed the last action
       });
     }
 
     rooms.get(roomId).users.add(socket.id);
     socket.emit("roomJoined", roomId);
-    socket.emit("roomState", rooms.get(roomId));
+
+    // Send room state with controller info
+    const roomState = rooms.get(roomId);
+    const stateToSend = {
+      id: roomState.id,
+      currentTrack: roomState.currentTrack,
+      isPlaying: roomState.isPlaying,
+      currentTime: roomState.currentTime,
+      volume: roomState.volume,
+      playlist: roomState.playlist,
+      controller: roomState.controller,
+      users: Array.from(roomState.users), // Convert Set to Array for JSON
+    };
+
+    socket.emit("roomState", stateToSend);
+    console.log(`Sent room state to ${socket.id}:`, {
+      currentTrack: roomState.currentTrack?.name || "none",
+      isPlaying: roomState.isPlaying,
+      playlistLength: roomState.playlist.length,
+    });
 
     // Generate share link if not exists
     if (!roomLinks.has(roomId)) {
@@ -109,20 +131,103 @@ io.on("connection", (socket) => {
     console.log(`User ${socket.id} left room ${roomId}`);
   });
 
-  // Play music
+  // Play music - only allow if user is the current controller or no controller exists
   socket.on("play", (roomId) => {
     if (rooms.has(roomId)) {
-      rooms.get(roomId).isPlaying = true;
-      rooms.get(roomId).currentTime = 0;
-      socket.to(roomId).emit("play", rooms.get(roomId).currentTime);
+      const room = rooms.get(roomId);
+
+      // Set this user as the controller if none exists
+      if (!room.controller) {
+        room.controller = socket.id;
+      }
+
+      // Only allow the current controller to play/pause
+      if (room.controller === socket.id) {
+        room.isPlaying = true;
+        room.lastActionTime = Date.now();
+        room.lastActionBy = socket.id;
+
+        // Broadcast to all other users in the room with current track info
+        socket.to(roomId).emit("play", room.currentTime);
+
+        // Also send current track to ensure everyone has the same track
+        if (room.currentTrack) {
+          socket.to(roomId).emit("trackChanged", room.currentTrack);
+        }
+
+        console.log(
+          `User ${socket.id} started playback in room ${roomId} at time ${room.currentTime}`
+        );
+      } else {
+        // Notify user they don't have control
+        socket.emit("controlDenied", {
+          message: "Another user is currently controlling playback",
+          controller: room.controller,
+        });
+      }
     }
   });
 
-  // Pause music
+  // Pause music - only allow if user is the current controller
   socket.on("pause", (roomId) => {
     if (rooms.has(roomId)) {
-      rooms.get(roomId).isPlaying = false;
-      socket.to(roomId).emit("pause");
+      const room = rooms.get(roomId);
+
+      // Only allow the current controller to play/pause
+      if (room.controller === socket.id) {
+        room.isPlaying = false;
+        room.lastActionTime = Date.now();
+        room.lastActionBy = socket.id;
+
+        // Broadcast to all other users in the room
+        socket.to(roomId).emit("pause");
+        console.log(`User ${socket.id} paused playback in room ${roomId}`);
+      } else {
+        // Notify user they don't have control
+        socket.emit("controlDenied", {
+          message: "Another user is currently controlling playback",
+          controller: room.controller,
+        });
+      }
+    }
+  });
+
+  // Request control of playback
+  socket.on("requestControl", (roomId) => {
+    if (rooms.has(roomId)) {
+      const room = rooms.get(roomId);
+
+      // Check if current controller is still active (within last 30 seconds)
+      const now = Date.now();
+      const controllerTimeout = 30000; // 30 seconds
+
+      if (
+        !room.controller ||
+        !room.users.has(room.controller) ||
+        (room.lastActionTime && now - room.lastActionTime > controllerTimeout)
+      ) {
+        // Grant control to requesting user
+        room.controller = socket.id;
+        room.lastActionTime = now;
+
+        // Notify all users about the new controller
+        io.to(roomId).emit("controllerChanged", {
+          controller: socket.id,
+          isYou: false,
+        });
+
+        socket.emit("controllerChanged", {
+          controller: socket.id,
+          isYou: true,
+        });
+
+        console.log(`Control granted to user ${socket.id} in room ${roomId}`);
+      } else {
+        socket.emit("controlDenied", {
+          message: "Another user is currently controlling playback",
+          controller: room.controller,
+        });
+      }
     }
   });
 
@@ -277,6 +382,19 @@ io.on("connection", (socket) => {
     for (const [roomId, room] of rooms.entries()) {
       if (room.users.has(socket.id)) {
         room.users.delete(socket.id);
+
+        // If the disconnecting user was the controller, clear controller
+        if (room.controller === socket.id) {
+          room.controller = null;
+          room.lastActionTime = null;
+
+          // Notify remaining users that control is available
+          io.to(roomId).emit("controllerChanged", {
+            controller: null,
+            isYou: false,
+          });
+        }
+
         if (room.users.size === 0) {
           rooms.delete(roomId);
         } else {
@@ -388,7 +506,7 @@ if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
 }
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => {
   console.log(`SyncBeats server running on port ${PORT}`);
   console.log(`Open http://localhost:${PORT} in your browser`);
