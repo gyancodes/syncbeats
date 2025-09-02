@@ -103,32 +103,42 @@ export class UIManager {
     document.getElementById("shareEmailBtn").addEventListener("click", () => {
       this.app.shareViaEmail();
     });
+
+    // Close modal when clicking outside
+    document.getElementById("sharingSection").addEventListener("click", (e) => {
+      if (e.target.id === "sharingSection") {
+        document.getElementById("sharingSection").style.display = "none";
+      }
+    });
   }
 
   updateConnectionStatus(connected) {
     const statusElement = document.getElementById("connectionStatus");
     if (connected) {
-      statusElement.className = "status connected";
-      statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Connected';
+      statusElement.className = "connection-status connected";
+      statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Connected</span>';
     } else {
-      statusElement.className = "status disconnected";
-      statusElement.innerHTML = '<i class="fas fa-times-circle"></i> Disconnected';
+      statusElement.className = "connection-status disconnected";
+      statusElement.innerHTML = '<i class="fas fa-circle"></i> <span>Disconnected</span>';
     }
   }
 
   updateRoomStatus(roomId) {
     const roomStatusElement = document.getElementById("roomStatus");
     const currentRoomElement = document.getElementById("currentRoom");
-    const shareRoomBtn = document.getElementById("shareRoomBtn");
+    const joinBtn = document.getElementById("joinRoomBtn");
+    const leaveBtn = document.getElementById("leaveRoomBtn");
 
     if (roomId) {
       roomStatusElement.classList.remove("hidden");
       currentRoomElement.textContent = roomId;
-      shareRoomBtn.style.display = "inline-flex";
+      joinBtn.classList.add("hidden");
+      leaveBtn.classList.remove("hidden");
       this.updateRoomStats();
     } else {
       roomStatusElement.classList.add("hidden");
-      shareRoomBtn.style.display = "none";
+      joinBtn.classList.remove("hidden");
+      leaveBtn.classList.add("hidden");
       document.getElementById("sharingSection").style.display = "none";
     }
   }
@@ -156,11 +166,13 @@ export class UIManager {
     const pauseBtn = document.getElementById("pauseBtn");
 
     if (this.app.audioManager.isPlaying) {
-      playBtn.style.display = "none";
-      pauseBtn.style.display = "inline-flex";
+      playBtn.classList.add("hidden");
+      pauseBtn.classList.remove("hidden");
+      pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
     } else {
-      playBtn.style.display = "inline-flex";
-      pauseBtn.style.display = "none";
+      playBtn.classList.remove("hidden");
+      pauseBtn.classList.add("hidden");
+      playBtn.innerHTML = '<i class="fas fa-play"></i>';
     }
   }
 
@@ -201,8 +213,12 @@ export class UIManager {
     const playlistElement = document.getElementById("playlist");
 
     if (this.app.playlistManager.playlist.length === 0) {
-      playlistElement.innerHTML = 
-        '<p style="text-align: center; color: #6c757d; font-style: italic;">No tracks in playlist yet</p>';
+      playlistElement.innerHTML = `
+        <div class="text-center text-muted" style="padding: 2rem;">
+          <i class="fas fa-music" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+          <p>No tracks in playlist yet</p>
+        </div>
+      `;
       return;
     }
 
@@ -211,25 +227,16 @@ export class UIManager {
         <div class="playlist-item ${
           track.id === this.app.audioManager.currentTrack?.id ? "current" : ""
         }">
-          <div>
-            <strong>${track.name}</strong>
-            <br>
-            <small>${
-              track.type === "youtube"
-                ? "YouTube Video"
-                : this.app.playlistManager.formatFileSize(track.size)
-            }</small>
-            ${
-              track.type === "youtube" && track.thumbnail
-                ? `<br><img src="${track.thumbnail}" style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px; margin-top: 5px;">`
-                : ""
-            }
+          <div class="track-info-item">
+            <div class="track-title">${track.name}</div>
+            <div class="track-meta">
+              ${track.type === "youtube" ? "YouTube Video" : this.app.playlistManager.formatFileSize(track.size)}
+              ${track.type === "youtube" && track.duration ? ` • ${this.formatTime(track.duration)}` : ""}
+            </div>
           </div>
-          <div>
-            <button class="btn btn-secondary" onclick="syncBeats.playTrack(${index})">
-              <i class="fas fa-play"></i>
-            </button>
-          </div>
+          <button class="btn btn-primary" onclick="syncBeats.playTrack(${index})" style="padding: 0.5rem;">
+            <i class="fas fa-play"></i>
+          </button>
         </div>
       `)
       .join("");
@@ -257,32 +264,25 @@ export class UIManager {
     const playBtn = document.getElementById("playBtn");
     const pauseBtn = document.getElementById("pauseBtn");
 
-    if (!controlStatus) {
-      const statusElement = document.createElement("div");
-      statusElement.id = "controlStatus";
-      statusElement.className = "control-status";
-      document.getElementById("playerControls").appendChild(statusElement);
-    }
-
     if (data.isYou) {
-      document.getElementById("controlStatus").innerHTML = 
-        '<i class="fas fa-crown"></i> You have control';
-      document.getElementById("controlStatus").className = "control-status has-control";
+      controlStatus.innerHTML = '<i class="fas fa-crown"></i> You have control';
+      controlStatus.className = "control-status has-control";
       playBtn.disabled = false;
       pauseBtn.disabled = false;
     } else if (data.controller) {
-      document.getElementById("controlStatus").innerHTML = 
-        '<i class="fas fa-hand-paper"></i> Another user has control - Click to request';
-      document.getElementById("controlStatus").className = "control-status no-control clickable";
-      document.getElementById("controlStatus").onclick = () => {
+      controlStatus.innerHTML = '<i class="fas fa-hand-paper"></i> Request control';
+      controlStatus.className = "control-status no-control";
+      controlStatus.style.cursor = "pointer";
+      controlStatus.onclick = () => {
         this.app.socketManager.emit("requestControl", this.app.currentRoom);
       };
       playBtn.disabled = true;
       pauseBtn.disabled = true;
     } else {
-      document.getElementById("controlStatus").innerHTML = 
-        '<i class="fas fa-play-circle"></i> Click play to take control';
-      document.getElementById("controlStatus").className = "control-status available";
+      controlStatus.innerHTML = '<i class="fas fa-play-circle"></i> Ready to play';
+      controlStatus.className = "control-status available";
+      controlStatus.style.cursor = "default";
+      controlStatus.onclick = null;
       playBtn.disabled = false;
       pauseBtn.disabled = false;
     }

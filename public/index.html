@@ -3,31 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncBeats - Synchronized Music Listening</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>SyncBeats - Professional Music Sync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
-            --background: 220 13% 9%;
-            --foreground: 220 9% 95%;
-            --card: 220 13% 11%;
-            --card-foreground: 220 9% 95%;
-            --primary: 142 76% 36%;
-            --primary-foreground: 220 13% 9%;
-            --secondary: 220 13% 15%;
-            --secondary-foreground: 220 9% 85%;
-            --muted: 220 13% 15%;
-            --muted-foreground: 220 9% 65%;
-            --accent: 142 76% 36%;
-            --accent-foreground: 220 13% 9%;
-            --destructive: 0 84% 60%;
-            --destructive-foreground: 220 13% 9%;
-            --border: 220 13% 20%;
-            --input: 220 13% 15%;
-            --ring: 142 76% 36%;
-            --radius: 0.75rem;
-            --glow: 142 76% 36%;
-            --grid: 220 13% 12%;
+            /* Modern Color Palette */
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #f1f5f9;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            
+            /* Neutral Colors */
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            
+            /* Background & Surface */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --surface: #ffffff;
+            --surface-elevated: #ffffff;
+            
+            /* Text Colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            
+            /* Borders & Shadows */
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --radius-full: 9999px;
         }
 
         * {
@@ -37,411 +80,319 @@
         }
 
         body {
-            font-family: 'Inter', 'JetBrains Mono', monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: 
-                radial-gradient(circle at 20% 80%, hsl(var(--glow) / 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, hsl(var(--glow) / 0.15) 0%, transparent 50%),
-                linear-gradient(135deg, hsl(var(--background)) 0%, hsl(220 13% 7%) 100%);
-            min-height: 100vh;
-            color: hsl(var(--foreground));
-            line-height: 1.5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
-            position: relative;
-            overflow-x: hidden;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(hsl(var(--grid) / 0.8) 1px, transparent 1px),
-                linear-gradient(90deg, hsl(var(--grid) / 0.8) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 50% 50%, hsl(var(--glow) / 0.05) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: -1;
-            animation: pulse 4s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
+        /* Layout Components */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 4rem;
-            padding: 3rem 0;
-            position: relative;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: var(--space-6) 0;
+            box-shadow: var(--shadow-sm);
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, hsl(var(--glow) / 0.2) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(40px);
-            z-index: -1;
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .header h1 {
-            font-size: clamp(3rem, 6vw, 5rem);
-            font-weight: 900;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, hsl(var(--glow)) 0%, hsl(var(--foreground)) 50%, hsl(var(--glow)) 100%);
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.03em;
-            text-shadow: 0 0 30px hsl(var(--glow) / 0.5);
-            position: relative;
         }
 
-        .header h1::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, hsl(var(--glow)), transparent);
-            animation: glow-line 2s ease-in-out infinite;
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
-        @keyframes glow-line {
-            0%, 100% { opacity: 0.5; width: 100px; }
-            50% { opacity: 1; width: 200px; }
+        .connection-status.connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
-        .header p {
-            font-size: 1.25rem;
-            color: hsl(var(--muted-foreground));
-            font-weight: 400;
-            font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            opacity: 0.8;
+        .connection-status.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         .main-content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-8) var(--space-6);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-8);
         }
 
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+        }
+
+        .main-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+        }
+
+        /* Card Components */
         .card {
-            background: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
-            padding: 2rem;
-            position: relative;
-            backdrop-filter: blur(20px);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, hsl(var(--glow) / 0.5), transparent);
-            animation: scan-line 3s linear infinite;
-        }
-
-        @keyframes scan-line {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, hsl(var(--glow) / 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
         }
 
         .card:hover {
-            border-color: hsl(var(--glow) / 0.5);
-            box-shadow: 
-                0 8px 32px hsl(var(--glow) / 0.15),
-                0 0 0 1px hsl(var(--glow) / 0.2) inset;
-            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--gray-300);
         }
 
-        .card:hover::after {
-            opacity: 1;
-        }
-
-        .card h2 {
-            color: hsl(var(--foreground));
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 600;
+        .card-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            letter-spacing: -0.01em;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-4);
+            border-bottom: 1px solid var(--border-light);
         }
 
-        .room-section {
-            margin-bottom: 2rem;
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: hsl(var(--foreground));
+        .card-icon {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: var(--radius);
             font-size: 0.875rem;
         }
 
-        .input-group input {
+        /* Form Components */
+        .form-group {
+            margin-bottom: var(--space-5);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .form-input {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid hsl(var(--border));
+            padding: var(--space-3) var(--space-4);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
-            font-size: 1rem;
-            background: hsl(var(--background));
-            color: hsl(var(--foreground));
+            font-size: 0.875rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             transition: all 0.2s ease;
-            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         }
 
-        .input-group input:focus {
+        .form-input:focus {
             outline: none;
-            border-color: hsl(var(--ring));
-            box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Button Components */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-5);
             font-size: 0.875rem;
             font-weight: 500;
             border-radius: var(--radius);
             border: none;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
             text-decoration: none;
             position: relative;
             overflow: hidden;
-            
-            /* 3D Button Effect */
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            box-shadow: 
-                0 1px 3px 0 rgb(0 0 0 / 0.1),
-                0 1px 2px -1px rgb(0 0 0 / 0.1),
-                0 4px 6px -1px rgb(0 0 0 / 0.1) inset;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:active {
             transform: translateY(0);
         }
 
-        .btn:hover {
-            background: hsl(var(--primary) / 0.9);
-            box-shadow: 
-                0 4px 6px -1px rgb(0 0 0 / 0.1),
-                0 2px 4px -2px rgb(0 0 0 / 0.1),
-                0 6px 8px -1px rgb(0 0 0 / 0.15) inset;
-            transform: translateY(-1px);
-        }
-
-        .btn:active {
-            transform: translateY(1px);
-            box-shadow: 
-                0 1px 2px 0 rgb(0 0 0 / 0.05),
-                0 2px 4px -1px rgb(0 0 0 / 0.1) inset;
-        }
-
         .btn-secondary {
-            background: hsl(var(--secondary));
-            color: hsl(var(--secondary-foreground));
-            box-shadow: 
-                0 1px 3px 0 rgb(0 0 0 / 0.1),
-                0 1px 2px -1px rgb(0 0 0 / 0.1),
-                0 4px 6px -1px rgb(0 0 0 / 0.05) inset;
+            background: var(--gray-100);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
         }
 
-        .btn-secondary:hover {
-            background: hsl(var(--secondary) / 0.8);
-        }
-
-        .btn-danger {
-            background: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
         }
 
         .btn-success {
-            background: hsl(142 76% 36%);
-            color: hsl(var(--primary-foreground));
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-group {
             display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
+            gap: var(--space-3);
         }
 
-        .control-status {
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius);
-            margin-top: 1rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            border: 1px solid;
-            text-align: center;
-            transition: all 0.2s ease;
+        .btn-full {
+            width: 100%;
         }
 
-        .control-status.has-control {
-            background: hsl(142 76% 36% / 0.1);
-            border-color: hsl(142 76% 36% / 0.3);
-            color: hsl(142 76% 36%);
-        }
-
-        .control-status.no-control {
-            background: hsl(var(--muted));
-            border-color: hsl(var(--border));
-            color: hsl(var(--muted-foreground));
-        }
-
-        .control-status.clickable {
-            cursor: pointer;
-            background: hsl(38 92% 50% / 0.1);
-            border-color: hsl(38 92% 50% / 0.3);
-            color: hsl(38 92% 50%);
-        }
-
-        .control-status.clickable:hover {
-            background: hsl(38 92% 50% / 0.2);
-            transform: translateY(-1px);
-        }
-
-        .control-denied-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: hsl(0 84% 60% / 0.95);
+        /* Player Components */
+        .player-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .player-card .card-header {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .player-card .card-title {
+            color: white;
+        }
+
+        .current-track {
+            background: rgba(255, 255, 255, 0.1);
+            padding: var(--space-4);
             border-radius: var(--radius);
-            font-weight: 500;
+            margin-bottom: var(--space-4);
+            text-align: center;
+        }
+
+        .track-name {
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: var(--space-1);
+        }
+
+        .track-info {
+            opacity: 0.8;
             font-size: 0.875rem;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            box-shadow: 0 10px 25px hsl(0 84% 60% / 0.3);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .status {
-            padding: 1rem;
-            border-radius: var(--radius);
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            border: 1px solid;
-        }
-
-        .status.connected {
-            background: hsl(142 76% 36% / 0.1);
-            color: hsl(142 76% 36%);
-            border-color: hsl(142 76% 36% / 0.2);
-        }
-
-        .status.disconnected {
-            background: hsl(var(--destructive) / 0.1);
-            color: hsl(var(--destructive));
-            border-color: hsl(var(--destructive) / 0.2);
-        }
-
-        .status.room {
-            background: hsl(221 83% 53% / 0.1);
-            color: hsl(221 83% 53%);
-            border-color: hsl(221 83% 53% / 0.2);
         }
 
         .player-controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
         }
 
-        .control-item {
+        .control-group {
             text-align: center;
-            padding: 1.5rem;
-            background: hsl(var(--muted));
-            border-radius: var(--radius);
-            border: 1px solid hsl(var(--border));
         }
 
-        .control-item h4 {
-            margin-bottom: 1rem;
-            color: hsl(var(--foreground));
-            font-weight: 600;
-            font-size: 0.875rem;
+        .control-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-bottom: var(--space-2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .volume-control {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
         }
 
         .volume-slider {
             width: 100%;
             height: 6px;
-            border-radius: 3px;
-            background: hsl(var(--border));
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.2);
             outline: none;
             -webkit-appearance: none;
             cursor: pointer;
@@ -449,44 +400,119 @@
 
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: hsl(var(--primary));
+            background: white;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgb(0 0 0 / 0.2);
+            box-shadow: var(--shadow);
         }
 
         .volume-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: hsl(var(--primary));
+            background: white;
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 4px rgb(0 0 0 / 0.2);
+            box-shadow: var(--shadow);
         }
 
+        .progress-control {
+            margin-bottom: var(--space-4);
+        }
+
+        .progress-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .progress-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: var(--space-2);
+        }
+
+        /* Room Status */
+        .room-status {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: var(--accent);
+            padding: var(--space-4);
+            border-radius: var(--radius);
+            margin-bottom: var(--space-4);
+        }
+
+        .room-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-3);
+        }
+
+        .room-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-4);
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(6, 182, 212, 0.05);
+            padding: var(--space-3);
+            border-radius: var(--radius);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Playlist */
         .playlist {
             max-height: 400px;
             overflow-y: auto;
-            border: 1px solid hsl(var(--border));
+            border: 1px solid var(--border);
             border-radius: var(--radius);
-            background: hsl(var(--background));
+            background: var(--bg-primary);
         }
 
         .playlist-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid hsl(var(--border));
+            justify-content: space-between;
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--border-light);
             transition: background-color 0.2s ease;
         }
 
         .playlist-item:hover {
-            background-color: hsl(var(--muted));
+            background: var(--bg-secondary);
         }
 
         .playlist-item:last-child {
@@ -494,117 +520,240 @@
         }
 
         .playlist-item.current {
-            background-color: hsl(var(--primary) / 0.1);
-            border-left: 4px solid hsl(var(--primary));
+            background: rgba(99, 102, 241, 0.05);
+            border-left: 4px solid var(--primary);
         }
 
-        .upload-section {
-            border: 2px dashed hsl(var(--border));
-            border-radius: var(--radius);
-            padding: 3rem 2rem;
+        .track-info-item {
+            flex: 1;
+        }
+
+        .track-title {
+            font-weight: 500;
+            margin-bottom: var(--space-1);
+        }
+
+        .track-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Upload Section */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-8);
             text-align: center;
-            background: hsl(var(--muted) / 0.5);
+            background: var(--bg-secondary);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .upload-section:hover {
-            background: hsl(var(--muted));
-            border-color: hsl(var(--primary));
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.02);
         }
 
-        .upload-section.dragover {
-            background: hsl(var(--primary) / 0.1);
-            border-color: hsl(var(--primary));
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: var(--space-4);
+        }
+
+        .upload-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+        }
+
+        .upload-subtitle {
+            color: var(--text-muted);
+            margin-bottom: var(--space-4);
         }
 
         .file-input {
             display: none;
         }
 
-        .upload-btn {
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            display: inline-flex;
+        /* YouTube Section */
+        .youtube-search {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+
+        .youtube-search input {
+            flex: 1;
+        }
+
+        .youtube-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .youtube-item {
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: var(--space-3);
+            background: var(--surface);
             transition: all 0.2s ease;
-            font-weight: 500;
-            box-shadow: 
-                0 1px 3px 0 rgb(0 0 0 / 0.1),
-                0 4px 6px -1px rgb(0 0 0 / 0.1) inset;
         }
 
-        .upload-btn:hover {
-            background: hsl(var(--primary) / 0.9);
+        .youtube-item:hover {
+            box-shadow: var(--shadow);
             transform: translateY(-1px);
-            box-shadow: 
-                0 4px 6px -1px rgb(0 0 0 / 0.1),
-                0 6px 8px -1px rgb(0 0 0 / 0.15) inset;
         }
 
+        .youtube-thumbnail {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+        }
+
+        .youtube-info {
+            flex: 1;
+        }
+
+        .youtube-title {
+            font-weight: 500;
+            margin-bottom: var(--space-1);
+            font-size: 0.875rem;
+        }
+
+        .youtube-duration {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Control Status */
+        .control-status {
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+            margin-top: var(--space-4);
+        }
+
+        .control-status.has-control {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .control-status.no-control {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .control-status.available {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* Progress Bar */
         .progress-bar {
             width: 100%;
             height: 8px;
-            background-color: hsl(var(--muted));
-            border-radius: 4px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
             overflow: hidden;
-            margin-top: 1rem;
+            margin-top: var(--space-3);
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
             width: 0%;
             transition: width 0.3s ease;
         }
 
-        .hidden {
-            display: none;
-        }
-
-        .user-list {
+        /* Sharing */
+        .share-link-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
         }
 
-        .user-badge {
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            padding: 0.25rem 0.75rem;
-            border-radius: calc(var(--radius) * 2);
-            font-size: 0.75rem;
-            font-weight: 500;
+        .share-link-group input {
+            flex: 1;
+            background: var(--gray-50);
         }
 
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space-3);
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .mb-0 { margin-bottom: 0; }
+        .mb-2 { margin-bottom: var(--space-2); }
+        .mb-4 { margin-bottom: var(--space-4); }
+        .mb-6 { margin-bottom: var(--space-6); }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
+                padding: var(--space-4);
+                gap: var(--space-4);
             }
-            
-            .container {
-                padding: 1rem;
+
+            .header-content {
+                padding: 0 var(--space-4);
+                flex-direction: column;
+                gap: var(--space-4);
             }
-            
+
             .btn-group {
                 flex-direction: column;
             }
-            
+
             .player-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .room-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .share-options {
                 grid-template-columns: 1fr;
             }
         }
 
+        /* Loading Animation */
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid hsl(var(--muted));
-            border-top: 2px solid hsl(var(--primary));
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--gray-300);
+            border-top: 2px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -614,353 +763,274 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* YouTube Section Styles */
-        .youtube-section {
-            border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            background: hsl(var(--card));
-        }
-
-        .youtube-section h3 {
-            color: hsl(var(--foreground));
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-        }
-
-        .youtube-results {
-            margin-top: 1.5rem;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .youtube-result-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
-            margin-bottom: 0.75rem;
-            background: hsl(var(--card));
-            transition: all 0.2s ease;
-        }
-
-        .youtube-result-item:hover {
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            transform: translateY(-1px);
-        }
-
-        .youtube-thumbnail {
-            width: 120px;
-            height: 90px;
-            object-fit: cover;
-            border-radius: var(--radius);
-            margin-right: 1rem;
-        }
-
-        .youtube-info {
-            flex: 1;
-        }
-
-        .youtube-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: hsl(var(--foreground));
-        }
-
-        .youtube-duration {
-            color: hsl(var(--muted-foreground));
-            font-size: 0.875rem;
-        }
-
-        .youtube-add-btn {
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            box-shadow: 
-                0 1px 3px 0 rgb(0 0 0 / 0.1),
-                0 4px 6px -1px rgb(0 0 0 / 0.1) inset;
-        }
-
-        .youtube-add-btn:hover {
-            background: hsl(var(--primary) / 0.9);
-            transform: translateY(-1px);
-        }
-
-        /* Sharing Section Styles */
-        .share-content {
-            text-align: center;
-        }
-
-        .share-link-container {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .share-link-container input {
-            flex: 1;
-            background: hsl(var(--muted));
-            cursor: text;
-        }
-
-        .share-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .share-options .btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        /* Room Status Enhancement */
-        .room-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .room-stats {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 1rem;
-            background: hsl(var(--muted));
-            border-radius: var(--radius);
-            min-width: 80px;
-            border: 1px solid hsl(var(--border));
-        }
-
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: hsl(var(--primary));
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: hsl(var(--muted-foreground));
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Enhanced scrollbar */
+        /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: hsl(var(--muted));
-            border-radius: 4px;
+            background: var(--gray-100);
+            border-radius: var(--radius-full);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: hsl(var(--muted-foreground) / 0.3);
-            border-radius: 4px;
+            background: var(--gray-300);
+            border-radius: var(--radius-full);
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: hsl(var(--muted-foreground) / 0.5);
+            background: var(--gray-400);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-music"></i> SyncBeats</h1>
-            <p>Listen to music together with your friends during calls</p>
-        </div>
-
-        <div class="main-content">
-            <!-- Connection & Room Management -->
-            <div class="card">
-                <h2><i class="fas fa-users"></i> Room Management</h2>
-                
-                <div class="room-section">
-                    <div class="input-group">
-                        <label for="roomId">Room ID:</label>
-                        <input type="text" id="roomId" placeholder="Enter room ID (e.g., party123)">
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button class="btn" id="joinRoomBtn">
-                            <i class="fas fa-sign-in-alt"></i> Join Room
-                        </button>
-                        <button class="btn btn-secondary" id="leaveRoomBtn" style="display: none;">
-                            <i class="fas fa-sign-out-alt"></i> Leave Room
-                        </button>
-                    </div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-music"></i>
+                    <span>SyncBeats</span>
                 </div>
-
-                <div id="connectionStatus" class="status disconnected">
-                    <i class="fas fa-times-circle"></i> Disconnected
-                </div>
-
-                <div id="roomStatus" class="status room hidden">
-                    <div class="room-info">
-                        <div>
-                            <i class="fas fa-users"></i> Connected to room: <span id="currentRoom"></span>
-                        </div>
-                        <button class="btn btn-secondary" id="shareRoomBtn" style="display: none;">
-                            <i class="fas fa-share-alt"></i> Share Room
-                        </button>
-                    </div>
-                    <div class="room-stats">
-                        <div class="stat-item">
-                            <div class="stat-number" id="userCount">0</div>
-                            <div class="stat-label">Users</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number" id="trackCount">0</div>
-                            <div class="stat-label">Tracks</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="userList" class="hidden">
-                    <h3>Users in Room:</h3>
-                    <div class="user-list" id="userListContent"></div>
+                <div id="connectionStatus" class="connection-status disconnected">
+                    <i class="fas fa-circle"></i>
+                    <span>Disconnected</span>
                 </div>
             </div>
+        </header>
 
-            <!-- Music Player -->
-            <div class="card">
-                <h2><i class="fas fa-play-circle"></i> Music Player</h2>
-                
-                <div id="playerSection" class="hidden">
-                    <div class="player-controls" id="playerControls">
-                        <div class="control-item">
-                            <h4>Playback</h4>
-                            <div class="btn-group">
-                                <button class="btn btn-success" id="playBtn">
-                                    <i class="fas fa-play"></i> Play
-                                </button>
-                                <button class="btn btn-secondary" id="pauseBtn">
-                                    <i class="fas fa-pause"></i> Pause
-                                </button>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Room Management -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h2 class="card-title">Room Management</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="roomId">Room ID</label>
+                        <input type="text" id="roomId" class="form-input" placeholder="Enter room ID (e.g., party123)">
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary btn-full" id="joinRoomBtn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Join Room
+                        </button>
+                        <button class="btn btn-secondary btn-full hidden" id="leaveRoomBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Leave Room
+                        </button>
+                    </div>
+
+                    <!-- Room Status -->
+                    <div id="roomStatus" class="room-status hidden">
+                        <div class="room-info">
+                            <div>
+                                <i class="fas fa-users"></i>
+                                Room: <strong id="currentRoom"></strong>
+                            </div>
+                            <button class="btn btn-secondary" id="shareRoomBtn">
+                                <i class="fas fa-share-alt"></i>
+                                Share
+                            </button>
+                        </div>
+                        <div class="room-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="userCount">0</div>
+                                <div class="stat-label">Users</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="trackCount">0</div>
+                                <div class="stat-label">Tracks</div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="control-item">
-                            <h4>Volume</h4>
-                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100">
-                            <div id="volumeValue">100%</div>
+                <!-- Upload Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
                         </div>
+                        <h2 class="card-title">Upload Music</h2>
                     </div>
 
-                    <div class="input-group">
-                        <label for="seekSlider">Progress:</label>
-                        <input type="range" id="seekSlider" min="0" max="100" value="0" step="0.1">
-                        <div id="timeDisplay">00:00 / 00:00</div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="currentTrack">Current Track:</label>
-                        <div id="currentTrack" style="padding: 10px; background: #f8f9fa; border-radius: 5px; min-height: 20px;">
-                            No track selected
+                    <div class="upload-area" id="uploadSection">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
                         </div>
-                    </div>
-                </div>
-
-                <div id="noRoomMessage">
-                    <p style="text-align: center; color: #6c757d; font-style: italic;">
-                        Join a room to start listening to music together!
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Playlist & Upload Section -->
-        <div class="card">
-            <h2><i class="fas fa-list"></i> Playlist & Upload</h2>
-            
-            <div id="playlistSection" class="hidden">
-                <div class="playlist" id="playlist">
-                    <p style="text-align: center; color: #6c757d; font-style: italic;">
-                        No tracks in playlist yet
-                    </p>
-                </div>
-            </div>
-
-            <!-- YouTube Search Section -->
-            <div class="youtube-section" id="youtubeSection">
-                <h3><i class="fab fa-youtube" style="color: #ff0000;"></i> Add from YouTube</h3>
-                <div class="input-group">
-                    <input type="text" id="youtubeSearch" placeholder="Search YouTube videos...">
-                    <button class="btn" id="searchYoutubeBtn">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                </div>
-                
-                <div id="youtubeResults" class="youtube-results hidden">
-                    <h4>Search Results:</h4>
-                    <div id="youtubeResultsList"></div>
-                </div>
-            </div>
-
-            <div class="upload-section" id="uploadSection">
-                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea; margin-bottom: 20px;"></i>
-                <h3>Upload Music</h3>
-                <p>Drag and drop audio files here or click to browse</p>
-                <input type="file" id="fileInput" class="file-input" accept="audio/*" multiple>
-                <label for="fileInput" class="upload-btn">
-                    <i class="fas fa-folder-open"></i> Choose Files
-                </label>
-                
-                <div id="uploadProgress" class="hidden">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div id="uploadStatus">Uploading...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Room Sharing Section -->
-        <div class="card" id="sharingSection" style="display: none;">
-            <h2><i class="fas fa-share-alt"></i> Share Room</h2>
-            <div class="share-content">
-                <div class="input-group">
-                    <label>Direct Join Link:</label>
-                    <div class="share-link-container">
-                        <input type="text" id="shareLink" readonly>
-                        <button class="btn btn-secondary" id="copyLinkBtn">
-                            <i class="fas fa-copy"></i> Copy
+                        <div class="upload-title">Drop files here</div>
+                        <div class="upload-subtitle">or click to browse</div>
+                        <input type="file" id="fileInput" class="file-input" accept="audio/*" multiple>
+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-folder-open"></i>
+                            Choose Files
                         </button>
                     </div>
+
+                    <div id="uploadProgress" class="hidden">
+                        <div class="text-center mb-2">
+                            <span id="uploadStatus">Uploading...</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
                 </div>
-                
+
+                <!-- YouTube Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fab fa-youtube"></i>
+                        </div>
+                        <h2 class="card-title">YouTube</h2>
+                    </div>
+
+                    <div class="youtube-search">
+                        <input type="text" id="youtubeSearch" class="form-input" placeholder="Search YouTube videos...">
+                        <button class="btn btn-primary" id="searchYoutubeBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+
+                    <div id="youtubeResults" class="youtube-results hidden">
+                        <div id="youtubeResultsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Panel -->
+            <div class="main-panel">
+                <!-- Music Player -->
+                <div class="card player-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <h2 class="card-title">Music Player</h2>
+                    </div>
+
+                    <div id="playerSection" class="hidden">
+                        <!-- Current Track -->
+                        <div class="current-track">
+                            <div class="track-name" id="currentTrack">No track selected</div>
+                            <div class="track-info" id="timeDisplay">00:00 / 00:00</div>
+                        </div>
+
+                        <!-- Progress Control -->
+                        <div class="progress-control">
+                            <input type="range" id="seekSlider" class="progress-slider" min="0" max="100" value="0">
+                        </div>
+
+                        <!-- Player Controls -->
+                        <div class="player-controls">
+                            <div class="control-group">
+                                <div class="control-label">Playback</div>
+                                <div class="btn-group">
+                                    <button class="btn btn-success" id="playBtn">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="btn btn-secondary hidden" id="pauseBtn">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">Volume</div>
+                                <div class="volume-control">
+                                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="100">
+                                    <div id="volumeValue" class="text-center">100%</div>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">Status</div>
+                                <div id="controlStatus" class="control-status available">
+                                    <i class="fas fa-play-circle"></i>
+                                    Ready to play
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="noRoomMessage" class="text-center text-muted">
+                        <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <p>Join a room to start listening to music together!</p>
+                    </div>
+                </div>
+
+                <!-- Playlist -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <h2 class="card-title">Playlist</h2>
+                    </div>
+
+                    <div id="playlistSection" class="hidden">
+                        <div class="playlist" id="playlist">
+                            <div class="text-center text-muted" style="padding: 2rem;">
+                                <i class="fas fa-music" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                                <p>No tracks in playlist yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sharing Modal (Hidden by default) -->
+        <div id="sharingSection" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+            <div class="card" style="max-width: 500px; width: 90%; margin: 0;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h2 class="card-title">Share Room</h2>
+                    <button class="btn btn-secondary" onclick="document.getElementById('sharingSection').style.display='none'" style="margin-left: auto;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="share-link-group">
+                    <input type="text" id="shareLink" class="form-input" readonly placeholder="Room link will appear here...">
+                    <button class="btn btn-secondary" id="copyLinkBtn">
+                        <i class="fas fa-copy"></i>
+                        Copy
+                    </button>
+                </div>
+
                 <div class="share-options">
                     <button class="btn btn-success" id="shareWhatsAppBtn">
-                        <i class="fab fa-whatsapp"></i> Share on WhatsApp
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp
                     </button>
                     <button class="btn btn-primary" id="shareTelegramBtn">
-                        <i class="fab fa-telegram"></i> Share on Telegram
+                        <i class="fab fa-telegram"></i>
+                        Telegram
                     </button>
-                    <button class="btn btn-info" id="shareEmailBtn">
-                        <i class="fas fa-envelope"></i> Share via Email
+                    <button class="btn btn-secondary" id="shareEmailBtn">
+                        <i class="fas fa-envelope"></i>
+                        Email
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Socket.IO -->
     <script src="/socket.io/socket.io.js"></script>
+    <!-- Main Application -->
     <script src="bundle.js"></script>
 </body>
 </html>

@@ -27,20 +27,20 @@ export class YouTubeManager {
     const resultsList = document.getElementById("youtubeResultsList");
 
     if (results.length === 0) {
-      resultsList.innerHTML = "<p>No results found</p>";
+      resultsList.innerHTML = '<div class="text-center text-muted">No results found</div>';
       return;
     }
 
     resultsList.innerHTML = results
       .map((video) => `
-        <div class="youtube-result-item">
+        <div class="youtube-item">
           <img src="${video.thumbnail}" alt="${video.title}" class="youtube-thumbnail">
           <div class="youtube-info">
             <div class="youtube-title">${video.title}</div>
             <div class="youtube-duration">${this.app.uiManager.formatTime(video.duration)}</div>
           </div>
-          <button class="youtube-add-btn" onclick="syncBeats.addYouTubeTrack('${video.videoId}')">
-            <i class="fas fa-plus"></i> Add
+          <button class="btn btn-primary" onclick="syncBeats.addYouTubeTrack('${video.videoId}')" style="padding: 0.5rem;">
+            <i class="fas fa-plus"></i>
           </button>
         </div>
       `)

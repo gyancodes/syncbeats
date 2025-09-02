@@ -5,7 +5,7 @@ export class SharingManager {
   }
 
   showSharingSection() {
-    document.getElementById("sharingSection").style.display = "block";
+    document.getElementById("sharingSection").style.display = "flex";
     this.app.socketManager.emit("getShareLink", this.app.currentRoom);
   }
 
