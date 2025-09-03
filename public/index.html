@@ -32,18 +32,14 @@
             --gray-800: #1e293b;
             --gray-900: #0f172a;
             
-            /* Background & Surface */
+            /* Light Mode Variables */
             --bg-primary: #ffffff;
             --bg-secondary: #f8fafc;
             --surface: #ffffff;
             --surface-elevated: #ffffff;
-            
-            /* Text Colors */
             --text-primary: #0f172a;
             --text-secondary: #475569;
             --text-muted: #64748b;
-            
-            /* Borders & Shadows */
             --border: #e2e8f0;
             --border-light: #f1f5f9;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -51,7 +47,27 @@
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg-primary: #1f2937;
+            --bg-secondary: #111827;
+            --surface: #1f2937;
+            --surface-elevated: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border: #374151;
+            --border-light: #4b5563;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+        }
+
+        :root {
             /* Spacing */
             --space-1: 0.25rem;
             --space-2: 0.5rem;
@@ -87,6 +103,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* Layout Components */
@@ -149,6 +166,88 @@
             background: rgba(239, 68, 68, 0.1);
             color: var(--error);
             border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .theme-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Theme transition for all elements */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Dark mode specific improvements */
+        [data-theme="dark"] .upload-area {
+            background: var(--surface-elevated);
+        }
+
+        [data-theme="dark"] .upload-area:hover {
+            background: var(--surface-elevated);
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .upload-area.dragover {
+            background: var(--surface-elevated);
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .playlist-item:hover {
+            background: var(--surface-elevated);
+        }
+
+        [data-theme="dark"] .youtube-item {
+            background: var(--surface-elevated);
+        }
+
+        [data-theme="dark"] .youtube-item:hover {
+            background: var(--surface-elevated);
+            transform: translateY(-1px);
+        }
+
+        [data-theme="dark"] .share-link-group input {
+            background: var(--surface-elevated);
+        }
+
+        /* Scrollbar dark mode */
+        [data-theme="dark"] ::-webkit-scrollbar-track {
+            background: var(--surface);
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-light);
         }
 
         .main-content {
@@ -730,6 +829,11 @@
                 gap: var(--space-4);
             }
 
+            .header-controls {
+                flex-direction: row;
+                gap: var(--space-3);
+            }
+
             .btn-group {
                 flex-direction: column;
             }
@@ -792,9 +896,16 @@
                     <i class="fas fa-music"></i>
                     <span>SyncBeats</span>
                 </div>
-                <div id="connectionStatus" class="connection-status disconnected">
-                    <i class="fas fa-circle"></i>
-                    <span>Disconnected</span>
+                <div class="header-controls">
+                    <div class="theme-toggle">
+                        <button id="themeToggle" class="theme-toggle-btn" title="Toggle theme">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </button>
+                    </div>
+                    <div id="connectionStatus" class="connection-status disconnected">
+                        <i class="fas fa-circle"></i>
+                        <span>Disconnected</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -1032,5 +1143,112 @@
     <script src="/socket.io/socket.io.js"></script>
     <!-- Main Application -->
     <script src="bundle.js"></script>
+    
+    <!-- Theme Management Script -->
+    <script>
+        class ThemeManager {
+            constructor() {
+                this.currentTheme = this.getStoredTheme() || this.getSystemTheme();
+                this.themeToggle = document.getElementById('themeToggle');
+                this.themeIcon = document.getElementById('themeIcon');
+                
+                this.init();
+            }
+
+            init() {
+                // Apply initial theme
+                this.applyTheme(this.currentTheme);
+                
+                // Bind events
+                this.themeToggle.addEventListener('click', () => this.toggleTheme());
+                
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (!this.getStoredTheme()) {
+                        this.applyTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+
+            getSystemTheme() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            getStoredTheme() {
+                return localStorage.getItem('syncbeats-theme');
+            }
+
+            storeTheme(theme) {
+                localStorage.setItem('syncbeats-theme', theme);
+            }
+
+            applyTheme(theme) {
+                this.currentTheme = theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                this.updateThemeIcon(theme);
+                this.updateMetaThemeColor(theme);
+                this.storeTheme(theme);
+            }
+
+            updateThemeIcon(theme) {
+                const icon = this.themeIcon;
+                if (theme === 'dark') {
+                    icon.className = 'fas fa-sun';
+                    this.themeToggle.title = 'Switch to light mode';
+                } else {
+                    icon.className = 'fas fa-moon';
+                    this.themeToggle.title = 'Switch to dark mode';
+                }
+            }
+
+            updateMetaThemeColor(theme) {
+                const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+                if (metaThemeColor) {
+                    metaThemeColor.setAttribute('content', theme === 'dark' ? '#1f2937' : '#ffffff');
+                } else {
+                    // Create meta tag if it doesn't exist
+                    const meta = document.createElement('meta');
+                    meta.name = 'theme-color';
+                    meta.content = theme === 'dark' ? '#1f2937' : '#ffffff';
+                    document.head.appendChild(meta);
+                }
+            }
+
+            toggleTheme() {
+                const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                this.applyTheme(newTheme);
+                
+                // Add a subtle animation effect
+                document.body.style.transition = 'all 0.3s ease';
+                setTimeout(() => {
+                    document.body.style.transition = '';
+                }, 300);
+            }
+
+            // Public method to get current theme
+            getCurrentTheme() {
+                return this.currentTheme;
+            }
+
+            // Public method to set theme programmatically
+            setTheme(theme) {
+                if (['light', 'dark'].includes(theme)) {
+                    this.applyTheme(theme);
+                }
+            }
+        }
+
+        // Initialize theme manager when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.themeManager = new ThemeManager();
+        });
+
+        // Prevent flash of unstyled content
+        (function() {
+            const theme = localStorage.getItem('syncbeats-theme') || 
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </body>
 </html>
