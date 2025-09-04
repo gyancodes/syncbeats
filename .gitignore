@@ -6,6 +6,9 @@ yarn-error.log*
 
 # Production build
 public/bundle.js
+.next/
+out/
+dist/
 
 # Uploads
 uploads/

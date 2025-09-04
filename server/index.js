@@ -96,7 +96,7 @@ io.on("connection", (socket) => {
 
     // Generate share link
     if (!roomLinks.has(roomId)) {
-      const shareLink = `http://localhost:3000/?room=${roomId}`;
+      const shareLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/?room=${roomId}`;
       roomLinks.set(roomId, shareLink);
     }
 
@@ -331,7 +331,7 @@ io.on("connection", (socket) => {
   // Get share link
   socket.on("getShareLink", (roomId) => {
     if (rooms.has(roomId)) {
-      const shareLink = roomLinks.get(roomId) || `http://localhost:3000/?room=${roomId}`;
+      const shareLink = roomLinks.get(roomId) || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/?room=${roomId}`;
       socket.emit("shareLink", { roomId, shareLink });
     }
   });
@@ -373,7 +373,7 @@ app.post("/upload", upload.single("audio"), (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const fileUrl = `http://localhost:3001/uploads/${req.file.filename}`;
+    const fileUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/uploads/${req.file.filename}`;
     res.json({
       success: true,
       fileUrl: fileUrl,

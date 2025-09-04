@@ -27,6 +27,24 @@ export default function RootLayout({
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function getInitialTheme() {
+                  const persistedTheme = localStorage.getItem('syncbeats-theme');
+                  if (persistedTheme && persistedTheme !== 'system') {
+                    return persistedTheme;
+                  }
+                  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                const theme = getInitialTheme();
+                document.documentElement.classList.add(theme);
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#1f2937' : '#ffffff');
+              })()
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.className} h-full transition-colors duration-300`} suppressHydrationWarning>
         <ThemeProvider>
