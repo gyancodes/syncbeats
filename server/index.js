@@ -20,10 +20,12 @@ const io = socketIo(server, {
 });
 
 // Middleware
-app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // File upload configuration
@@ -96,7 +98,9 @@ io.on("connection", (socket) => {
 
     // Generate share link
     if (!roomLinks.has(roomId)) {
-      const shareLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/?room=${roomId}`;
+      const shareLink = `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      }/?room=${roomId}`;
       roomLinks.set(roomId, shareLink);
     }
 
@@ -104,7 +108,9 @@ io.on("connection", (socket) => {
     const userCount = rooms.get(roomId).users.size;
     io.to(roomId).emit("userCountUpdate", { userCount, roomId });
 
-    console.log(`User ${socket.id} joined room ${roomId}. Total users: ${userCount}`);
+    console.log(
+      `User ${socket.id} joined room ${roomId}. Total users: ${userCount}`
+    );
   });
 
   // Leave room
@@ -184,28 +190,29 @@ io.on("connection", (socket) => {
       const now = Date.now();
       const controllerTimeout = 30000;
 
-      if (!room.controller || 
-          !room.users.has(room.controller) || 
-          (room.lastActionTime && (now - room.lastActionTime) > controllerTimeout)) {
-        
+      if (
+        !room.controller ||
+        !room.users.has(room.controller) ||
+        (room.lastActionTime && now - room.lastActionTime > controllerTimeout)
+      ) {
         room.controller = socket.id;
         room.lastActionTime = now;
 
-        io.to(roomId).emit("controllerChanged", { 
+        io.to(roomId).emit("controllerChanged", {
           controller: socket.id,
-          isYou: false 
+          isYou: false,
         });
-        
-        socket.emit("controllerChanged", { 
+
+        socket.emit("controllerChanged", {
           controller: socket.id,
-          isYou: true 
+          isYou: true,
         });
 
         console.log(`Control granted to user ${socket.id} in room ${roomId}`);
       } else {
-        socket.emit("controlDenied", { 
+        socket.emit("controlDenied", {
           message: "Another user is currently controlling playback",
-          controller: room.controller 
+          controller: room.controller,
         });
       }
     }
@@ -294,7 +301,9 @@ io.on("connection", (socket) => {
       const videoInfo = await ytdl.getInfo(videoId);
 
       const audioFormats = ytdl.filterFormats(videoInfo.formats, "audioonly");
-      const bestAudio = audioFormats.find((format) => format.container === "mp4") || audioFormats[0];
+      const bestAudio =
+        audioFormats.find((format) => format.container === "mp4") ||
+        audioFormats[0];
 
       if (!bestAudio) {
         throw new Error("No audio format available");
@@ -331,7 +340,11 @@ io.on("connection", (socket) => {
   // Get share link
   socket.on("getShareLink", (roomId) => {
     if (rooms.has(roomId)) {
-      const shareLink = roomLinks.get(roomId) || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/?room=${roomId}`;
+      const shareLink =
+        roomLinks.get(roomId) ||
+        `${
+          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+        }/?room=${roomId}`;
       socket.emit("shareLink", { roomId, shareLink });
     }
   });
@@ -373,7 +386,9 @@ app.post("/upload", upload.single("audio"), (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const fileUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/uploads/${req.file.filename}`;
+    const fileUrl = `${
+      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+    }/api/uploads/${req.file.filename}`;
     res.json({
       success: true,
       fileUrl: fileUrl,
