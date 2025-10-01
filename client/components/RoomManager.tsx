@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, LogIn, LogOut, Share2 } from 'lucide-react';

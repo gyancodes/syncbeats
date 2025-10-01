@@ -1,4 +1,4 @@
-// SyncBeats Client Application
+// SyncBeats Client Application with Improved Synchronization
 class SyncBeats {
   constructor() {
     this.socket = null;
@@ -8,8 +8,10 @@ class SyncBeats {
     this.currentTrack = null;
     this.playlist = [];
     this.syncInterval = null;
-    this.hasControl = false; // Whether this user can control playback
-    this.isController = false; // Whether this user is the current controller
+    this.hasControl = false;
+    this.isController = false;
+    this.lastSyncTime = 0;
+    this.syncThreshold = 0.5; // Sync if difference is more than 0.5 seconds
 
     this.initializeSocket();
     this.bindEvents();
@@ -17,17 +19,20 @@ class SyncBeats {
   }
 
   initializeSocket() {
-    this.socket = io();
+    this.socket = io('http://localhost:3001');
 
     this.socket.on("connect", () => {
+      console.log("Connected to server");
       this.updateConnectionStatus(true);
     });
 
     this.socket.on("disconnect", () => {
+      console.log("Disconnected from server");
       this.updateConnectionStatus(false);
     });
 
     this.socket.on("roomJoined", (roomId) => {
+      console.log("Joined room:", roomId);
       this.currentRoom = roomId;
       this.updateRoomStatus(roomId);
       this.showPlayerSection();
@@ -35,76 +40,94 @@ class SyncBeats {
     });
 
     this.socket.on("roomState", (roomState) => {
+      console.log("Received room state:", roomState);
       this.updateRoomState(roomState);
     });
 
+    // Playback events with improved sync
     this.socket.on("play", async (time) => {
       console.log("Received play event with time:", time);
       await this.playMusicLocal(time);
     });
 
     this.socket.on("pause", () => {
+      console.log("Received pause event");
       this.pauseMusicLocal();
     });
 
     this.socket.on("seek", (time) => {
+      console.log("Received seek event:", time);
       this.seekToTime(time);
     });
 
     this.socket.on("volumeChange", (volume) => {
+      console.log("Received volume change:", volume);
       this.setVolume(volume);
     });
 
+    // Playlist events
     this.socket.on("playlistUpdate", (playlist) => {
+      console.log("Received playlist update:", playlist);
       this.updatePlaylist(playlist);
     });
 
     this.socket.on("trackAdded", (track) => {
+      console.log("Received track added:", track);
       this.addTrackToPlaylist(track);
     });
 
     this.socket.on("trackChanged", async (track) => {
-      console.log("Received track change event:", track.name);
+      console.log("Received track change event:", track);
       await this.changeTrack(track);
     });
 
     this.socket.on("trackRemoved", (data) => {
+      console.log("Received track removed:", data);
       this.removeTrackFromPlaylist(data.trackId);
     });
 
+    // User events
     this.socket.on("userCountUpdate", (data) => {
+      console.log("User count update:", data);
       this.updateUserCount(data.userCount);
     });
 
     this.socket.on("syncTime", (time) => {
+      console.log("Received sync time:", time);
       this.syncTime(time);
     });
 
     // Control system events
     this.socket.on("controllerChanged", (data) => {
+      console.log("Controller changed:", data);
       this.updateControlStatus(data);
     });
 
     this.socket.on("controlDenied", (data) => {
+      console.log("Control denied:", data);
       this.showControlDeniedMessage(data.message);
     });
 
     // YouTube events
     this.socket.on("youtubeResults", (data) => {
+      console.log("YouTube results:", data);
       this.displayYouTubeResults(data.results);
     });
 
     this.socket.on("youtubeTrackAdded", (data) => {
+      console.log("YouTube track added:", data);
       this.addTrackToPlaylist(data.track);
-      alert(`Added YouTube track: ${data.track.name}`);
+      this.showNotification(`Added YouTube track: ${data.track.name}`, 'success');
     });
 
     this.socket.on("youtubeError", (data) => {
-      alert(`YouTube Error: ${data.error}`);
+      console.log("YouTube error:", data);
+      this.showNotification(`YouTube Error: ${data.error}`, 'error');
     });
 
     // Sharing events
     this.socket.on("shareLink", (data) => {
+      console.log("Share link received:", data);
       this.updateShareLink(data.shareLink);
     });
   }
@@ -132,7 +155,9 @@ class SyncBeats {
     document.getElementById("volumeSlider").addEventListener("input", (e) => {
       const volume = e.target.value / 100;
       this.setVolume(volume);
-      this.socket.emit("volumeChange", { roomId: this.currentRoom, volume });
+      if (this.currentRoom) {
+        this.socket.emit("volumeChange", { roomId: this.currentRoom, volume });
+      }
     });
 
     // Seek control
@@ -164,11 +189,9 @@ class SyncBeats {
     });
 
     // YouTube search
-    document
-      .getElementById("searchYoutubeBtn")
-      .addEventListener("click", () => {
-        this.searchYouTube();
-      });
+    document.getElementById("searchYoutubeBtn").addEventListener("click", () => {
+      this.searchYouTube();
+    });
 
     // Room sharing
     document.getElementById("shareRoomBtn").addEventListener("click", () => {
@@ -179,17 +202,13 @@ class SyncBeats {
       this.copyShareLink();
     });
 
-    document
-      .getElementById("shareWhatsAppBtn")
-      .addEventListener("click", () => {
-        this.shareOnWhatsApp();
-      });
+    document.getElementById("shareWhatsAppBtn").addEventListener("click", () => {
+      this.shareOnWhatsApp();
+    });
 
-    document
-      .getElementById("shareTelegramBtn")
-      .addEventListener("click", () => {
-        this.shareOnTelegram();
-      });
+    document.getElementById("shareTelegramBtn").addEventListener("click", () => {
+      this.shareOnTelegram();
+    });
 
     document.getElementById("shareEmailBtn").addEventListener("click", () => {
       this.shareViaEmail();
@@ -201,6 +220,7 @@ class SyncBeats {
 
   setupAudioEvents() {
     this.audio.addEventListener("loadedmetadata", () => {
+      console.log("Audio metadata loaded");
       this.updateSeekSlider();
     });
 
@@ -210,14 +230,19 @@ class SyncBeats {
 
       // Sync time with other users every 2 seconds
       if (this.isPlaying && this.currentRoom) {
-        this.socket.emit("syncTime", {
-          roomId: this.currentRoom,
-          time: this.audio.currentTime,
-        });
+        const now = Date.now();
+        if (now - this.lastSyncTime > 2000) {
+          this.socket.emit("syncTime", {
+            roomId: this.currentRoom,
+            time: this.audio.currentTime,
+          });
+          this.lastSyncTime = now;
+        }
       }
     });
 
     this.audio.addEventListener("ended", () => {
+      console.log("Track ended, playing next");
       this.playNextTrack();
     });
 
@@ -229,16 +254,13 @@ class SyncBeats {
         console.log("YouTube track error, attempting to refresh URL...");
         this.refreshYouTubeUrl(this.currentTrack);
       } else {
-        const errorMsg = e.target.error
-          ? e.target.error.message
-          : "Unknown error";
+        const errorMsg = e.target.error ? e.target.error.message : "Unknown error";
         console.error(`Audio file error: ${errorMsg}`);
 
-        // If it's a file not found error, remove from playlist
         if (errorMsg.includes("404") || errorMsg.includes("not found")) {
           this.handleMissingFile();
         } else {
-          alert("Error playing audio: " + errorMsg);
+          this.showNotification("Error playing audio: " + errorMsg, 'error');
         }
       }
     });
@@ -247,15 +269,17 @@ class SyncBeats {
   joinRoom() {
     const roomId = document.getElementById("roomId").value.trim();
     if (!roomId) {
-      alert("Please enter a room ID");
+      this.showNotification("Please enter a room ID", 'error');
       return;
     }
 
+    console.log("Joining room:", roomId);
     this.socket.emit("joinRoom", roomId);
   }
 
   leaveRoom() {
     if (this.currentRoom) {
+      console.log("Leaving room:", this.currentRoom);
       this.socket.emit("leaveRoom", this.currentRoom);
       this.currentRoom = null;
       this.hidePlayerSection();
@@ -267,7 +291,7 @@ class SyncBeats {
 
   async playMusic(time = null) {
     if (!this.currentTrack) {
-      alert("No track selected. Please upload music first.");
+      this.showNotification("No track selected. Please upload music first.", 'error');
       return;
     }
 
@@ -277,7 +301,7 @@ class SyncBeats {
     // If user action, check if they have control or need to request it
     if (isUserAction && this.currentRoom) {
       if (!this.isController) {
-        // Request control first
+        console.log("Requesting control to play music");
         this.socket.emit("requestControl", this.currentRoom);
         return;
       }
@@ -315,12 +339,13 @@ class SyncBeats {
 
       // Only emit to other users if this user initiated the play and has control
       if (isUserAction && this.isController && this.currentRoom) {
+        console.log("Emitting play event to room");
         this.socket.emit("play", this.currentRoom);
       }
     } catch (error) {
       console.error("Error playing audio:", error);
       if (error.name !== "AbortError" && error.name !== "NotAllowedError") {
-        alert("Error playing audio: " + error.message);
+        this.showNotification("Error playing audio: " + error.message, 'error');
       }
     }
   }
@@ -328,7 +353,7 @@ class SyncBeats {
   pauseMusic() {
     // Check if user has control
     if (this.currentRoom && !this.isController) {
-      // Request control first
+      console.log("Requesting control to pause music");
       this.socket.emit("requestControl", this.currentRoom);
       return;
     }
@@ -340,20 +365,22 @@ class SyncBeats {
 
     // Only emit if user has control
     if (this.currentRoom && this.isController) {
+      console.log("Emitting pause event to room");
       this.socket.emit("pause", this.currentRoom);
     }
   }
 
   pauseMusicLocal() {
+    console.log("Pausing music locally (from server sync)");
     this.audio.pause();
     this.isPlaying = false;
     this.updatePlayButton();
     this.stopSyncInterval();
-    // Don't emit to server - this is from server sync
   }
 
   async playMusicLocal(time = null) {
     if (!this.currentTrack) {
+      console.log("No current track to play locally");
       return;
     }
 
@@ -375,7 +402,7 @@ class SyncBeats {
             this.audio.removeEventListener("canplay", onCanPlay);
             this.audio.removeEventListener("error", onError);
             reject(new Error("Audio load timeout"));
-          }, 10000); // 10 second timeout
+          }, 10000);
 
           const onCanPlay = () => {
             clearTimeout(timeout);
@@ -417,16 +444,14 @@ class SyncBeats {
       this.startSyncInterval();
 
       console.log("Audio playing successfully");
-      // Don't emit to server - this is from server sync
     } catch (error) {
       console.error("Error playing audio locally:", error);
       
-      // If it's a YouTube track, try to refresh the URL
       if (this.currentTrack && this.currentTrack.type === "youtube") {
         console.log("YouTube track error, attempting to refresh URL...");
         this.refreshYouTubeUrl(this.currentTrack);
       } else {
-        alert("Error playing audio: " + error.message);
+        this.showNotification("Error playing audio: " + error.message, 'error');
       }
     }
   }
@@ -451,15 +476,14 @@ class SyncBeats {
   setVolume(volume) {
     this.audio.volume = volume;
     document.getElementById("volumeSlider").value = volume * 100;
-    document.getElementById("volumeValue").textContent =
-      Math.round(volume * 100) + "%";
+    document.getElementById("volumeValue").textContent = Math.round(volume * 100) + "%";
   }
 
   async changeTrack(track) {
     console.log("Changing track to:", track.name, "URL:", track.url);
     
     // Stop current playback first
-    this.pauseMusicLocal(); // Use local pause to avoid server emission
+    this.pauseMusicLocal();
 
     this.currentTrack = track;
 
@@ -477,7 +501,7 @@ class SyncBeats {
           this.audio.removeEventListener("canplaythrough", onCanPlay);
           this.audio.removeEventListener("error", onError);
           reject(new Error("Track load timeout"));
-        }, 15000); // 15 second timeout
+        }, 15000);
 
         const onCanPlay = () => {
           clearTimeout(timeout);
@@ -511,7 +535,7 @@ class SyncBeats {
         console.log("Attempting to refresh YouTube URL...");
         this.refreshYouTubeUrl(track);
       } else {
-        alert("Error loading track: " + track.name);
+        this.showNotification("Error loading track: " + track.name, 'error');
       }
     }
   }
@@ -543,7 +567,7 @@ class SyncBeats {
       if (file.type.startsWith("audio/")) {
         this.uploadFile(file);
       } else {
-        alert(`${file.name} is not an audio file`);
+        this.showNotification(`${file.name} is not an audio file`, 'error');
       }
     });
   }
@@ -555,7 +579,7 @@ class SyncBeats {
     this.showUploadProgress();
 
     try {
-      const response = await fetch("/upload", {
+      const response = await fetch("http://localhost:3001/upload", {
         method: "POST",
         body: formData,
       });
@@ -581,12 +605,14 @@ class SyncBeats {
           this.currentTrack = track;
           this.loadAudio();
         }
+
+        this.showNotification(`Uploaded: ${file.name}`, 'success');
       } else {
-        alert("Upload failed: " + result.error);
+        this.showNotification("Upload failed: " + result.error, 'error');
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Upload failed. Please try again.");
+      this.showNotification("Upload failed. Please try again.", 'error');
     } finally {
       this.hideUploadProgress();
     }
@@ -601,7 +627,6 @@ class SyncBeats {
     this.playlist = this.playlist.filter((track) => track.id !== trackId);
     this.updatePlaylistDisplay();
 
-    // If current track was removed, play next
     if (this.currentTrack && this.currentTrack.id === trackId) {
       if (this.playlist.length > 0) {
         this.playNextTrack();
@@ -732,7 +757,9 @@ class SyncBeats {
   }
 
   syncTime(time) {
-    if (Math.abs(this.audio.currentTime - time) > 1) {
+    const timeDiff = Math.abs(this.audio.currentTime - time);
+    if (timeDiff > this.syncThreshold) {
+      console.log(`Syncing time: ${this.audio.currentTime} -> ${time} (diff: ${timeDiff})`);
       this.audio.currentTime = time;
     }
   }
@@ -860,12 +887,12 @@ class SyncBeats {
   searchYouTube() {
     const query = document.getElementById("youtubeSearch").value.trim();
     if (!query) {
-      alert("Please enter a search term");
+      this.showNotification("Please enter a search term", 'error');
       return;
     }
 
     if (!this.currentRoom) {
-      alert("Please join a room first");
+      this.showNotification("Please join a room first", 'error');
       return;
     }
 
@@ -907,7 +934,7 @@ class SyncBeats {
 
   addYouTubeTrack(videoId) {
     if (!this.currentRoom) {
-      alert("Please join a room first");
+      this.showNotification("Please join a room first", 'error');
       return;
     }
 
@@ -917,7 +944,7 @@ class SyncBeats {
   async refreshYouTubeUrl(track) {
     try {
       const videoId = track.id.replace("yt_", "");
-      const response = await fetch(`/api/youtube/${videoId}`);
+      const response = await fetch(`http://localhost:3001/api/youtube/${videoId}`);
       const data = await response.json();
 
       if (data.url) {
@@ -930,8 +957,9 @@ class SyncBeats {
       }
     } catch (error) {
       console.error("Failed to refresh YouTube URL:", error);
-      alert(
-        "Failed to play YouTube track. The video might be unavailable or restricted."
+      this.showNotification(
+        "Failed to play YouTube track. The video might be unavailable or restricted.",
+        'error'
       );
     }
   }
@@ -956,7 +984,7 @@ class SyncBeats {
       } else {
         this.currentTrack = null;
         this.updateCurrentTrackDisplay();
-        alert("Audio file not found and has been removed from playlist.");
+        this.showNotification("Audio file not found and has been removed from playlist.", 'error');
       }
 
       // Notify other users in room
@@ -983,7 +1011,7 @@ class SyncBeats {
     const shareLink = document.getElementById("shareLink");
     shareLink.select();
     document.execCommand("copy");
-    alert("Link copied to clipboard!");
+    this.showNotification("Link copied to clipboard!", 'success');
   }
 
   shareOnWhatsApp() {
@@ -1082,17 +1110,44 @@ class SyncBeats {
   }
 
   showControlDeniedMessage(message) {
-    // Show a temporary message
-    const messageDiv = document.createElement("div");
-    messageDiv.className = "control-denied-message";
-    messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+    this.showNotification(message, 'error');
+  }
+
+  showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+      <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+      ${message}
+    `;
     
-    document.body.appendChild(messageDiv);
+    // Add styles
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease-out;
+      background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+    `;
     
-    // Remove message after 3 seconds
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
     setTimeout(() => {
-      if (messageDiv.parentNode) {
-        messageDiv.parentNode.removeChild(messageDiv);
+      if (notification.parentNode) {
+        notification.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
       }
     }, 3000);
   }

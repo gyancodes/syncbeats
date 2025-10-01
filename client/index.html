@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncBeats - Synchronized Music Listening</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-music"></i> SyncBeats</h1>
+            <p>Synchronized Music Listening Experience</p>
+        </header>
+
+        <div class="connection-status">
+            <div id="connectionStatus" class="status disconnected">
+                <i class="fas fa-times-circle"></i> Connecting...
+            </div>
+        </div>
+
+        <div class="room-section">
+            <div class="room-input">
+                <input type="text" id="roomId" placeholder="Enter Room ID" maxlength="20">
+                <button id="joinRoomBtn" class="btn btn-primary">
+                    <i class="fas fa-door-open"></i> Join Room
+                </button>
+                <button id="leaveRoomBtn" class="btn btn-secondary hidden">
+                    <i class="fas fa-door-closed"></i> Leave Room
+                </button>
+            </div>
+
+            <div id="roomStatus" class="room-status hidden">
+                <div class="room-info">
+                    <span>Room: <strong id="currentRoom"></strong></span>
+                    <span>Users: <span id="userCount">1</span></span>
+                    <span>Tracks: <span id="trackCount">0</span></span>
+                </div>
+                <button id="shareRoomBtn" class="btn btn-outline">
+                    <i class="fas fa-share"></i> Share Room
+                </button>
+            </div>
+        </div>
+
+        <div id="noRoomMessage" class="no-room-message">
+            <i class="fas fa-music"></i>
+            <h3>Join a Room to Start Listening</h3>
+            <p>Enter a room ID above or create a new one to start synchronized music listening with friends!</p>
+        </div>
+
+        <div id="playerSection" class="player-section hidden">
+            <div class="player-controls">
+                <div id="controlStatus" class="control-status no-control">
+                    <i class="fas fa-play-circle"></i> Click play to take control
+                </div>
+                
+                <div class="track-info">
+                    <div id="currentTrack" class="current-track">No track selected</div>
+                </div>
+
+                <div class="controls">
+                    <button id="playBtn" class="btn btn-primary">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button id="pauseBtn" class="btn btn-primary hidden">
+                        <i class="fas fa-pause"></i>
+                    </button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="time-display">
+                        <span id="timeDisplay">00:00 / 00:00</span>
+                    </div>
+                    <input type="range" id="seekSlider" class="seek-slider" min="0" max="100" value="0">
+                </div>
+
+                <div class="volume-section">
+                    <i class="fas fa-volume-up"></i>
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="100">
+                    <span id="volumeValue">100%</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="playlistSection" class="playlist-section hidden">
+            <h3><i class="fas fa-list"></i> Playlist</h3>
+            <div id="playlist" class="playlist">
+                <p style="text-align: center; color: #6c757d; font-style: italic;">No tracks in playlist yet</p>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h3><i class="fas fa-upload"></i> Add Music</h3>
+            <div id="uploadSection" class="upload-area">
+                <div class="upload-content">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & drop audio files here or click to browse</p>
+                    <input type="file" id="fileInput" multiple accept="audio/*" style="display: none;">
+                    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-folder-open"></i> Browse Files
+                    </button>
+                </div>
+                <div id="uploadProgress" class="upload-progress hidden">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <div id="uploadStatus">Uploading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="youtube-section">
+            <h3><i class="fab fa-youtube"></i> Add from YouTube</h3>
+            <div class="youtube-search">
+                <input type="text" id="youtubeSearch" placeholder="Search YouTube for music...">
+                <button id="searchYoutubeBtn" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            <div id="youtubeResults" class="youtube-results hidden">
+                <h4>Search Results</h4>
+                <div id="youtubeResultsList" class="youtube-results-list"></div>
+            </div>
+        </div>
+
+        <div id="sharingSection" class="sharing-section hidden">
+            <h3><i class="fas fa-share-alt"></i> Share Room</h3>
+            <div class="share-link">
+                <input type="text" id="shareLink" readonly placeholder="Share link will appear here...">
+                <button id="copyLinkBtn" class="btn btn-primary">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+            </div>
+            <div class="share-buttons">
+                <button id="shareWhatsAppBtn" class="btn btn-success">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button id="shareTelegramBtn" class="btn btn-info">
+                    <i class="fab fa-telegram"></i> Telegram
+                </button>
+                <button id="shareEmailBtn" class="btn btn-outline">
+                    <i class="fas fa-envelope"></i> Email
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

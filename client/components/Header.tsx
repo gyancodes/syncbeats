@@ -1,5 +1,3 @@
-'use client';
-
 import { motion } from 'framer-motion';
 import { Music, Wifi, WifiOff } from 'lucide-react';
 import { useSyncBeatsStore } from '@/store/syncBeatsStore';

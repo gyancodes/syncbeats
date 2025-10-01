@@ -1,10 +1,8 @@
 @echo off
-echo Starting SyncBeats...
+echo Starting SyncBeats Server...
 echo.
-echo Make sure you have Node.js installed and dependencies are installed with: npm install
+echo Server will be available at: http://localhost:3001
 echo.
-echo Starting server on http://localhost:3000
 echo Press Ctrl+C to stop the server
 echo.
-node server.js
-pause
+node server/index.js

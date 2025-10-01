@@ -1,5 +1,3 @@
-'use client';
-
 import { motion } from 'framer-motion';
 import { List, Play, Music, Trash2 } from 'lucide-react';
 import { useSyncBeatsStore } from '@/store/syncBeatsStore';

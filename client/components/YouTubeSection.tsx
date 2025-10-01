@@ -1,9 +1,6 @@
-'use client';
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Youtube, Search, Plus, Loader2 } from 'lucide-react';
-import Image from 'next/image';
 import { useSyncBeatsStore } from '@/store/syncBeatsStore';
 
 export default function YouTubeSection() {
@@ -90,12 +87,10 @@ export default function YouTubeSection() {
                 className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200"
               >
                 <div className="relative w-20 h-15 flex-shrink-0">
-                  <Image
+                  <img
                     src={video.thumbnail}
                     alt={video.title}
-                    fill
-                    className="object-cover rounded"
-                    sizes="80px"
+                    className="w-full h-full object-cover rounded"
                   />
                 </div>
                 

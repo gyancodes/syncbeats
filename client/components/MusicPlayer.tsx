@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, Crown, Hand, PlayCircle, Users } from 'lucide-react';
@@ -17,7 +15,6 @@ export default function MusicPlayer() {
     isController,
     hasControl,
     playMusic,
-    pauseMusic,
     setVolume,
     seekTo,
     requestControl,
@@ -152,7 +149,7 @@ export default function MusicPlayer() {
           <div className="text-xs opacity-80 mb-2 uppercase tracking-wide">Playback</div>
           <div className="flex gap-2 justify-center">
             <button
-              onClick={playMusic}
+              onClick={() => playMusic()}
               disabled={!currentTrack || (!isController && hasControl)}
               className="bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed p-2 rounded-lg transition-colors"
             >

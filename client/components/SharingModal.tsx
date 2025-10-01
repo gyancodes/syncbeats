@@ -1,5 +1,3 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, MessageCircle, Send, Mail } from 'lucide-react';
 import { useSyncBeatsStore } from '@/store/syncBeatsStore';

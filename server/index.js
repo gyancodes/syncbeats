@@ -1,3 +1,4 @@
+// SyncBeats Server - Main Entry Point
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
@@ -13,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -22,11 +23,14 @@ const io = socketIo(server, {
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
     credentials: true,
   })
 );
 app.use(express.json());
+
+// Serve static files from client directory
+app.use(express.static(path.join(__dirname, "../client")));
 
 // File upload configuration
 const storage = multer.diskStorage({
@@ -98,9 +102,7 @@ io.on("connection", (socket) => {
 
     // Generate share link
     if (!roomLinks.has(roomId)) {
-      const shareLink = `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-      }/?room=${roomId}`;
+      const shareLink = `http://localhost:3001/?room=${roomId}`;
       roomLinks.set(roomId, shareLink);
     }
 
@@ -342,9 +344,7 @@ io.on("connection", (socket) => {
     if (rooms.has(roomId)) {
       const shareLink =
         roomLinks.get(roomId) ||
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-        }/?room=${roomId}`;
+        `http://localhost:3001/?room=${roomId}`;
       socket.emit("shareLink", { roomId, shareLink });
     }
   });
@@ -386,9 +386,7 @@ app.post("/upload", upload.single("audio"), (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const fileUrl = `${
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-    }/api/uploads/${req.file.filename}`;
+    const fileUrl = `http://localhost:3001/uploads/${req.file.filename}`;
     res.json({
       success: true,
       fileUrl: fileUrl,
@@ -411,6 +409,32 @@ app.get("/uploads/:filename", (req, res) => {
   }
 });
 
+// YouTube API endpoint
+app.get("/api/youtube/:videoId", async (req, res) => {
+  try {
+    const { videoId } = req.params;
+    const videoInfo = await ytdl.getInfo(videoId);
+
+    const audioFormats = ytdl.filterFormats(videoInfo.formats, "audioonly");
+    const bestAudio =
+      audioFormats.find((format) => format.container === "mp4") ||
+      audioFormats[0];
+
+    if (!bestAudio) {
+      return res.status(400).json({ error: "No audio format available" });
+    }
+
+    res.json({
+      success: true,
+      url: bestAudio.url,
+      title: videoInfo.videoDetails.title,
+    });
+  } catch (error) {
+    console.error("YouTube API error:", error);
+    res.status(500).json({ error: "Failed to get YouTube audio URL" });
+  }
+});
+
 // Create uploads directory
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
@@ -419,5 +443,5 @@ if (!fs.existsSync("uploads")) {
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`SyncBeats server running on port ${PORT}`);
-  console.log(`Socket.IO server ready for Next.js frontend`);
+  console.log(`Open http://localhost:${PORT} in your browser`);
 });

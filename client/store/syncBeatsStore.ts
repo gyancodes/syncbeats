@@ -62,7 +62,7 @@ interface SyncBeatsState {
   initializeSocket: () => void;
   joinRoom: (roomId: string) => void;
   leaveRoom: () => void;
-  playMusic: (time?: number) => void;
+  playMusic: () => void;
   pauseMusic: () => void;
   setVolume: (volume: number) => void;
   seekTo: (time: number) => void;
@@ -228,7 +228,7 @@ export const useSyncBeatsStore = create<SyncBeatsState>()(
         }
       },
 
-      playMusic: (time?: number) => {
+      playMusic: () => {
         const { socket, currentRoom, isController, currentTrack } = get();
         
         if (!currentTrack) {

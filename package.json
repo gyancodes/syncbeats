@@ -1,16 +1,13 @@
 {
   "name": "syncbeats",
   "version": "2.0.0",
-  "description": "A modern synchronized music listening app built with Next.js",
+  "description": "A modern synchronized music listening app with real-time synchronization",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "server": "node server/index.js",
-    "dev:server": "nodemon server/index.js",
-    "dev:full": "concurrently \"npm run dev\" \"npm run dev:server\""
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "client": "cd client && python -m http.server 3000",
+    "dev:full": "concurrently \"npm run dev\" \"npm run client\""
   },
   "keywords": [
     "music",
@@ -34,13 +31,11 @@
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.294.0",
     "multer": "^1.4.5-lts.1",
-    "next": "14.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
-    "tailwindcss": "^3.3.6",
     "uuid": "^9.0.0",
     "yt-search": "^2.13.1",
     "zustand": "^4.4.7"
@@ -49,12 +44,18 @@
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
-    "eslint": "^8.53.0",
-    "eslint-config-next": "14.0.3",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
     "nodemon": "^3.0.1",
     "postcss": "^8.4.31",
-    "typescript": "^5.2.2"
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.5"
   }
 }

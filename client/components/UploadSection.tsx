@@ -1,8 +1,6 @@
-'use client';
-
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { CloudUpload, FolderOpen } from 'lucide-react';
+import { Upload, FolderOpen } from 'lucide-react';
 import { useSyncBeatsStore } from '@/store/syncBeatsStore';
 import toast from 'react-hot-toast';
 
@@ -49,7 +47,7 @@ export default function UploadSection() {
     >
       <div className="card-header">
         <div className="card-icon">
-          <CloudUpload className="w-5 h-5" />
+          <Upload className="w-5 h-5" />
         </div>
         <h2 className="card-title">Upload Music</h2>
       </div>
@@ -59,7 +57,7 @@ export default function UploadSection() {
         onDragOver={handleDragOver}
         className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all duration-200 cursor-pointer"
       >
-        <CloudUpload className="w-12 h-12 text-blue-500 dark:text-blue-400 mx-auto mb-4" />
+        <Upload className="w-12 h-12 text-blue-500 dark:text-blue-400 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Drop files here</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-4">or click to browse</p>
         

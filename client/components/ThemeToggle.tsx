@@ -1,5 +1,3 @@
-'use client';
-
 import { motion } from 'framer-motion';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
