@@ -237,7 +237,7 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
   removeTrack: (trackId: string) => {
     const { socket, currentRoom } = get();
     if (socket && currentRoom) {
-      socket.emit('removeTrack', { roomId: currentRoom, trackId });
+      socket.emit('trackRemoved', { roomId: currentRoom, trackId });
     }
   },
 

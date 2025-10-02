@@ -2,21 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, SkipForward, SkipBack } from 'lucide-react';
 import { useSyncBeatsStore } from '../store/syncBeatsStore';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
 
 export default function MusicPlayer() {
   const {
     currentTrack,
-    isPlaying,
-    currentTime,
-    duration,
-    volume,
     playMusic,
     pauseMusic,
-    setVolume,
-    seekToTime,
     isController,
     hasControl
   } = useSyncBeatsStore();
+
+  const {
+    currentTime,
+    duration,
+    volume,
+    isPlaying,
+    handleSeek,
+    handleVolumeChange
+  } = useAudioPlayer();
 
   const formatTime = (seconds: number) => {
     if (!seconds || !isFinite(seconds)) return '00:00';
@@ -25,14 +29,14 @@ export default function MusicPlayer() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = (parseFloat(e.target.value) / 100) * duration;
-    seekToTime(newTime);
+    handleSeek(newTime);
   };
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVolumeChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value) / 100;
-    setVolume(newVolume);
+    handleVolumeChange(newVolume);
   };
 
   return (
@@ -95,7 +99,7 @@ export default function MusicPlayer() {
               min="0"
               max="100"
               value={duration ? (currentTime / duration) * 100 : 0}
-              onChange={handleSeek}
+              onChange={handleSeekChange}
               className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
             />
           </div>
@@ -131,7 +135,7 @@ export default function MusicPlayer() {
               min="0"
               max="100"
               value={volume * 100}
-              onChange={handleVolumeChange}
+              onChange={handleVolumeChangeInput}
               className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
             />
             <span className="text-sm text-gray-600 dark:text-gray-400 w-12">
