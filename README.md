@@ -15,15 +15,15 @@ A real-time synchronized music listening application that allows multiple users 
 
 ```
 syncbeats/
-├── client/                 # Frontend (HTML/CSS/JS)
-│   ├── index.html         # Main HTML file
-│   ├── styles.css         # Styling
-│   └── app.js            # Client-side JavaScript
-├── server/                # Backend (Node.js)
-│   └── index.js          # Server entry point
-├── uploads/               # Uploaded audio files
-├── package.json          # Dependencies and scripts
-└── README.md            # This file
+├── server/               # Express.js backend server
+│   ├── services/         # Server services
+│   ├── routes/           # API routes
+│   ├── app.js           # Main server class
+│   └── index.js         # Server entry point
+├── uploads/              # Uploaded audio files
+├── public/              # Static assets
+├── start.bat            # Windows start script
+└── package.json         # Dependencies and scripts
 ```
 
 ## Installation
@@ -105,12 +105,11 @@ npm run dev
 
 ## Technologies Used
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **Backend**: Node.js, Express.js
 - **Real-time**: Socket.IO
 - **File Upload**: Multer
 - **YouTube Integration**: ytdl-core, yt-search
-- **Styling**: Custom CSS with responsive design
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 
 ## Browser Support
 

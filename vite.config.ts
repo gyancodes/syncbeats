@@ -7,15 +7,21 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   server: {
     port: 3000,
     open: true,
+    proxy: {
+      '/api': 'http://localhost:3001',
+      '/upload': 'http://localhost:3001',
+      '/uploads': 'http://localhost:3001',
+    },
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
   },
 })
+

@@ -1,17 +1,16 @@
-'use client';
-
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Header from '@/components/Header';
-import RoomManager from '@/components/RoomManager';
-import MusicPlayer from '@/components/MusicPlayer';
-import Playlist from '@/components/Playlist';
-import UploadSection from '@/components/UploadSection';
-import YouTubeSection from '@/components/YouTubeSection';
-import SharingModal from '@/components/SharingModal';
-import { useSyncBeatsStore } from '@/store/syncBeatsStore';
+import Header from './components/Header';
+import RoomManager from './components/RoomManager';
+import MusicPlayer from './components/MusicPlayer';
+import Playlist from './components/Playlist';
+import UploadSection from './components/UploadSection';
+import YouTubeSection from './components/YouTubeSection';
+import SharingModal from './components/SharingModal';
+import { useSyncBeatsStore } from './store/syncBeatsStore';
+import './App.css';
 
-export default function Home() {
+function App() {
   const { initializeSocket, currentRoom } = useSyncBeatsStore();
 
   useEffect(() => {
@@ -48,3 +47,6 @@ export default function Home() {
     </div>
   );
 }
+
+export default App;
+
