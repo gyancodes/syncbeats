@@ -31,8 +31,20 @@ app.use(
 );
 app.use(express.json());
 
-// Serve static files from client directory
-app.use(express.static(path.join(__dirname, "../client")));
+// Set Content Security Policy headers
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: blob: https:; " +
+    "connect-src 'self' ws: wss: http: https:; " +
+    "media-src 'self' blob: data: https:; " +
+    "font-src 'self' data:;"
+  );
+  next();
+});
 
 // Initialize socket handler
 const socketHandler = new SocketHandler(io);
@@ -61,6 +73,14 @@ app.get("/api/youtube/:videoId", async (req, res) => {
     console.error("YouTube API error:", error);
     res.status(500).json({ error: "Failed to get YouTube audio URL" });
   }
+});
+
+// Serve static files from build directory
+app.use(express.static(path.join(__dirname, "../dist")));
+
+// Serve React app for all non-API routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 const PORT = process.env.PORT || 3001;

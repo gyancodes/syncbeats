@@ -121,10 +121,10 @@ class SocketHandler {
       room.lastActionTime = Date.now();
       room.lastActionBy = socket.id;
 
-      socket.to(roomId).emit("play", room.currentTime);
+      this.io.to(roomId).emit("play", room.currentTime);
 
       if (room.currentTrack) {
-        socket.to(roomId).emit("trackChanged", room.currentTrack);
+        this.io.to(roomId).emit("trackChanged", room.currentTrack);
       }
 
       console.log(`User ${socket.id} started playback in room ${roomId} at time ${room.currentTime}`);
@@ -145,7 +145,7 @@ class SocketHandler {
       room.lastActionTime = Date.now();
       room.lastActionBy = socket.id;
 
-      socket.to(roomId).emit("pause");
+      this.io.to(roomId).emit("pause");
       console.log(`User ${socket.id} paused playback in room ${roomId}`);
     } else {
       socket.emit("controlDenied", {
@@ -193,7 +193,7 @@ class SocketHandler {
     const room = this.roomManager.getRoom(roomId);
     if (room) {
       room.currentTime = time;
-      socket.to(roomId).emit("seek", time);
+      this.io.to(roomId).emit("seek", time);
     }
   }
 
@@ -202,7 +202,7 @@ class SocketHandler {
     const room = this.roomManager.getRoom(roomId);
     if (room) {
       room.volume = volume;
-      socket.to(roomId).emit("volumeChange", volume);
+      this.io.to(roomId).emit("volumeChange", volume);
     }
   }
 
@@ -211,7 +211,7 @@ class SocketHandler {
     const room = this.roomManager.getRoom(roomId);
     if (room) {
       room.currentTime = time;
-      socket.to(roomId).emit("syncTime", time);
+      this.io.to(roomId).emit("syncTime", time);
     }
   }
 
@@ -223,8 +223,8 @@ class SocketHandler {
       if (!room.currentTrack) {
         room.currentTrack = track;
       }
-      socket.to(roomId).emit("playlistUpdate", room.playlist);
-      socket.to(roomId).emit("trackAdded", track);
+      this.io.to(roomId).emit("playlistUpdate", room.playlist);
+      this.io.to(roomId).emit("trackAdded", track);
     }
   }
 
@@ -235,8 +235,8 @@ class SocketHandler {
       room.currentTrack = room.playlist[trackIndex];
       room.currentTime = 0;
       room.isPlaying = false;
-      socket.to(roomId).emit("trackChanged", room.currentTrack);
-      socket.to(roomId).emit("pause");
+      this.io.to(roomId).emit("trackChanged", room.currentTrack);
+      this.io.to(roomId).emit("pause");
     }
   }
 
@@ -250,8 +250,8 @@ class SocketHandler {
         room.currentTrack = room.playlist.length > 0 ? room.playlist[0] : null;
       }
 
-      socket.to(roomId).emit("trackRemoved", { trackId });
-      socket.to(roomId).emit("playlistUpdate", room.playlist);
+      this.io.to(roomId).emit("trackRemoved", { trackId });
+      this.io.to(roomId).emit("playlistUpdate", room.playlist);
     }
   }
 
@@ -280,8 +280,8 @@ class SocketHandler {
         if (!room.currentTrack) {
           room.currentTrack = track;
         }
-        socket.to(roomId).emit("playlistUpdate", room.playlist);
-        socket.to(roomId).emit("trackAdded", track);
+        this.io.to(roomId).emit("playlistUpdate", room.playlist);
+        this.io.to(roomId).emit("trackAdded", track);
         socket.emit("youtubeTrackAdded", { track, roomId });
       }
     } catch (error) {

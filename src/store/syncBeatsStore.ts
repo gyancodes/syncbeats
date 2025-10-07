@@ -161,8 +161,18 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
       });
     });
 
-    socket.on('youtubeResults', (data: { results: YouTubeVideo[] }) => {
-      set({ youtubeResults: data.results, isSearching: false });
+    socket.on('youtubeResults', (data: any) => {
+      const mapped = (data?.results || []).map((v: any) => ({
+        videoId: v.videoId || v.videoId,
+        title: v.title,
+        thumbnail: v.thumbnail || v.image,
+        duration: typeof v.duration === 'number' ? v.duration : (v.duration?.seconds ?? v.seconds ?? 0),
+      }));
+      set({ youtubeResults: mapped, isSearching: false });
+    });
+
+    socket.on('youtubeError', () => {
+      set({ isSearching: false });
     });
 
     socket.on('youtubeTrackAdded', (data: { track: Track }) => {
@@ -198,15 +208,16 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
   },
 
   playMusic: () => {
-    const { socket, currentRoom, isController } = get();
-    if (socket && currentRoom && isController) {
+    const { socket, currentRoom } = get();
+    if (socket && currentRoom) {
+      // Let the server grant control if none exists; it will deny if someone else controls
       socket.emit('play', currentRoom);
     }
   },
 
   pauseMusic: () => {
-    const { socket, currentRoom, isController } = get();
-    if (socket && currentRoom && isController) {
+    const { socket, currentRoom } = get();
+    if (socket && currentRoom) {
       socket.emit('pause', currentRoom);
     }
   },
@@ -259,7 +270,7 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
         const track: Track = {
           id: Date.now() + Math.random().toString(),
           name: file.name,
-          url: result.fileUrl,
+          url: `http://localhost:3001${result.fileUrl}`,
           size: result.size,
           type: file.type,
         };
