@@ -133,11 +133,8 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
     });
 
     socket.on('playlistUpdate', (playlist: Track[]) => {
+      // Source of truth comes from server; avoid local appends to prevent duplicates
       set({ playlist });
-    });
-
-    socket.on('trackAdded', (track: Track) => {
-      set(state => ({ playlist: [...state.playlist, track] }));
     });
 
     socket.on('trackChanged', (track: Track) => {
@@ -175,9 +172,7 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
       set({ isSearching: false });
     });
 
-    socket.on('youtubeTrackAdded', (data: { track: Track }) => {
-      set(state => ({ playlist: [...state.playlist, data.track] }));
-    });
+    // Do not append locally; rely on server's playlistUpdate broadcast
 
     socket.on('shareLink', (data: { shareLink: string }) => {
       set({ shareLink: data.shareLink });

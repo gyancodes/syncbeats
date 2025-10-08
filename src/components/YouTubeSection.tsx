@@ -4,7 +4,7 @@ import { Youtube, Search, Plus, X } from 'lucide-react';
 import { useSyncBeatsStore } from '../store/syncBeatsStore';
 
 export default function YouTubeSection() {
-  const { searchYouTube, youtubeResults, addYouTubeTrack, isSearching } = useSyncBeatsStore();
+  const { searchYouTube, youtubeResults, addYouTubeTrack, isSearching, currentRoom } = useSyncBeatsStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
 
@@ -16,6 +16,9 @@ export default function YouTubeSection() {
   };
 
   const handleAddTrack = (videoId: string) => {
+    if (!currentRoom) {
+      return; // Guard: must join a room before adding
+    }
     addYouTubeTrack(videoId);
   };
 
@@ -42,6 +45,11 @@ export default function YouTubeSection() {
       </div>
 
       <div className="space-y-4">
+        {!currentRoom && (
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 text-sm text-yellow-800 dark:text-yellow-200">
+            Join a room to add YouTube tracks to a shared playlist.
+          </div>
+        )}
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -112,7 +120,8 @@ export default function YouTubeSection() {
                 </div>
                 <button
                   onClick={() => handleAddTrack(video.videoId)}
-                  className="btn btn-primary flex items-center gap-1 text-sm"
+                  className="btn btn-primary flex items-center gap-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!currentRoom}
                 >
                   <Plus className="w-4 h-4" />
                   Add
@@ -133,6 +142,7 @@ export default function YouTubeSection() {
     </motion.div>
   );
 }
+
 
 
 

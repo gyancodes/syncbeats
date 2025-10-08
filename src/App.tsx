@@ -11,11 +11,22 @@ import { useSyncBeatsStore } from './store/syncBeatsStore';
 import './App.css';
 
 function App() {
-  const { initializeSocket, currentRoom } = useSyncBeatsStore();
+  const { initializeSocket, currentRoom, joinRoom, isConnected } = useSyncBeatsStore();
 
   useEffect(() => {
     initializeSocket();
   }, [initializeSocket]);
+
+  // Auto-join only when a room is specified in the URL (?room=ID)
+  useEffect(() => {
+    if (isConnected && !currentRoom) {
+      const params = new URLSearchParams(window.location.search);
+      const roomFromUrl = params.get('room');
+      if (roomFromUrl && roomFromUrl.trim()) {
+        joinRoom(roomFromUrl.trim());
+      }
+    }
+  }, [isConnected, currentRoom, joinRoom]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">

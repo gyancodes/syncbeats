@@ -50,6 +50,9 @@ app.use((req, res, next) => {
 const socketHandler = new SocketHandler(io);
 socketHandler.initialize();
 
+// Serve uploads statically to support range/HEAD requests from audio elements
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // API Routes
 app.post("/upload", fileUploadService.getUploadMiddleware(), (req, res) => {
   fileUploadService.handleUpload(req, res);

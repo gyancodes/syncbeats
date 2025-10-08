@@ -4,11 +4,14 @@ import { Upload, FileAudio, X } from 'lucide-react';
 import { useSyncBeatsStore } from '../store/syncBeatsStore';
 
 export default function UploadSection() {
-  const { uploadFile, isUploading } = useSyncBeatsStore();
+  const { uploadFile, isUploading, currentRoom } = useSyncBeatsStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const handleFileSelect = (files: FileList | null) => {
+    if (!currentRoom) {
+      return; // Guard: must join a room before uploading
+    }
     if (files) {
       Array.from(files).forEach(file => {
         if (file.type.startsWith('audio/')) {
@@ -54,13 +57,19 @@ export default function UploadSection() {
         </h2>
       </div>
 
+      {!currentRoom && (
+        <div className="mb-4 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 text-sm text-yellow-800 dark:text-yellow-200">
+          Join a room to upload and share tracks.
+        </div>
+      )}
+
       <div
         className={`upload-area ${dragActive ? 'dragover' : ''}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => currentRoom && fileInputRef.current?.click()}
       >
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -79,7 +88,7 @@ export default function UploadSection() {
             </p>
           </div>
 
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" disabled={!currentRoom}>
             <Upload className="w-4 h-4 mr-2" />
             Choose Files
           </button>
@@ -112,6 +121,7 @@ export default function UploadSection() {
     </motion.div>
   );
 }
+
 
 
 

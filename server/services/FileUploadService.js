@@ -6,16 +6,18 @@ const { v4: uuidv4 } = require("uuid");
 
 class FileUploadService {
   constructor() {
+    // Always resolve to the project uploads folder: <project>/uploads
+    this.uploadDir = path.join(__dirname, "../../../uploads");
     this.setupStorage();
     this.ensureUploadDirectory();
   }
 
   setupStorage() {
     const storage = multer.diskStorage({
-      destination: function (req, file, cb) {
-        cb(null, "uploads/");
+      destination: (req, file, cb) => {
+        cb(null, this.uploadDir);
       },
-      filename: function (req, file, cb) {
+      filename: (req, file, cb) => {
         cb(null, uuidv4() + path.extname(file.originalname));
       },
     });
@@ -33,8 +35,8 @@ class FileUploadService {
   }
 
   ensureUploadDirectory() {
-    if (!fs.existsSync("uploads")) {
-      fs.mkdirSync("uploads");
+    if (!fs.existsSync(this.uploadDir)) {
+      fs.mkdirSync(this.uploadDir, { recursive: true });
     }
   }
 
@@ -47,8 +49,10 @@ class FileUploadService {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
-
+      const savedPath = path.join(this.uploadDir, req.file.filename);
+      const exists = fs.existsSync(savedPath);
       const fileUrl = `/uploads/${req.file.filename}`;
+      console.log("Upload saved:", { savedPath, exists, original: req.file.originalname, size: req.file.size });
       res.json({
         success: true,
         fileUrl: fileUrl,
@@ -61,9 +65,11 @@ class FileUploadService {
   }
 
   handleFileRequest(req, res) {
-    const filePath = path.join(__dirname, "../../../uploads", req.params.filename);
+    const filePath = path.join(this.uploadDir, req.params.filename);
+    const exists = fs.existsSync(filePath);
+    console.log("Serve file request:", { filePath, exists });
 
-    if (fs.existsSync(filePath)) {
+    if (exists) {
       res.sendFile(filePath);
     } else {
       console.error(`File not found: ${filePath}`);
