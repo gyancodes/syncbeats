@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useSyncBeatsStore } from '../store/syncBeatsStore';
 
 export const useAudioPlayer = () => {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const {
     currentTrack,
     isPlaying,
@@ -10,6 +10,8 @@ export const useAudioPlayer = () => {
     duration,
     volume,
     seekToTime,
+    syncPlaybackTime,
+    updateCurrentTime,
     setVolume,
     isController,
     hasControl
@@ -19,8 +21,8 @@ export const useAudioPlayer = () => {
   useEffect(() => {
     if (!audioRef.current) {
       const audio = document.createElement('audio');
-      audio.crossOrigin = 'anonymous';
-      audio.preload = 'metadata';
+      // Preload more aggressively for local files and avoid cross-origin requirements
+      audio.preload = 'auto';
       document.body.appendChild(audio);
       audioRef.current = audio;
     }
@@ -38,14 +40,24 @@ export const useAudioPlayer = () => {
     if (audioRef.current && currentTrack) {
       audioRef.current.src = currentTrack.url;
       audioRef.current.load();
+      // If already in playing state, attempt to play immediately on track change
+      if (isPlaying) {
+        audioRef.current.play().catch((err) => {
+          console.error('Audio play error on track change:', err, 'src:', audioRef.current?.src);
+        });
+      }
     }
-  }, [currentTrack]);
+  }, [currentTrack, isPlaying]);
 
   // Handle play/pause
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.play().catch(console.error);
+        // Ensure volume is set before play
+        audioRef.current.volume = volume;
+        audioRef.current.play().catch((err) => {
+          console.error('Audio play error:', err, 'src:', audioRef.current?.src);
+        });
       } else {
         audioRef.current.pause();
       }
@@ -59,26 +71,26 @@ export const useAudioPlayer = () => {
     }
   }, [volume]);
 
-  // Handle time updates
+  // Handle time updates (Local UI update only)
   useEffect(() => {
     if (audioRef.current) {
       const audio = audioRef.current;
       
       const handleTimeUpdate = () => {
         if (isController) {
-          seekToTime(audio.currentTime);
+          updateCurrentTime(audio.currentTime);
         }
       };
 
       const handleLoadedMetadata = () => {
         if (isController) {
-          seekToTime(audio.currentTime);
+          updateCurrentTime(audio.currentTime);
         }
       };
 
       const handleDurationChange = () => {
         if (isController) {
-          seekToTime(audio.currentTime);
+          updateCurrentTime(audio.currentTime);
         }
       };
 
@@ -86,15 +98,48 @@ export const useAudioPlayer = () => {
       audio.addEventListener('loadedmetadata', handleLoadedMetadata);
       audio.addEventListener('durationchange', handleDurationChange);
 
+      const handleCanPlay = () => {
+        // Auto-attempt play when the media becomes playable
+        if (isPlaying) {
+          audio.play().catch((err) => {
+            console.error('Audio play error on canplay:', err, 'src:', audio.src);
+          });
+        }
+      };
+
+      const handleError = () => {
+        console.error('Audio element error:', audio.error, 'src:', audio.src);
+      };
+
+      audio.addEventListener('canplay', handleCanPlay);
+      audio.addEventListener('canplaythrough', handleCanPlay);
+      audio.addEventListener('error', handleError);
+
       return () => {
         audio.removeEventListener('timeupdate', handleTimeUpdate);
         audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audio.removeEventListener('durationchange', handleDurationChange);
+        audio.removeEventListener('canplay', handleCanPlay);
+        audio.removeEventListener('canplaythrough', handleCanPlay);
+        audio.removeEventListener('error', handleError);
       };
     }
-  }, [isController, seekToTime]);
+  }, [isController, updateCurrentTime, isPlaying]);
 
-  // Handle seeking
+  // Periodic Sync (Network Broadcast)
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isController && isPlaying && audioRef.current) {
+      interval = setInterval(() => {
+        if (audioRef.current) {
+          syncPlaybackTime(audioRef.current.currentTime);
+        }
+      }, 5000); // Sync every 5 seconds
+    }
+    return () => clearInterval(interval);
+  }, [isController, isPlaying, syncPlaybackTime]);
+
+  // Handle seeking incoming from store (for listeners)
   useEffect(() => {
     if (audioRef.current && !isController) {
       const audio = audioRef.current;
@@ -107,21 +152,17 @@ export const useAudioPlayer = () => {
     }
   }, [currentTime, isController]);
 
-  // Handle duration updates
-  useEffect(() => {
-    if (audioRef.current && audioRef.current.duration) {
-      const audio = audioRef.current;
-      if (isController) {
-        seekToTime(audio.currentTime);
-      }
-    }
-  }, [isController, seekToTime]);
+  // Handle duration updates for listeners? No, durations strictly from metadata usually.
+  // ... existing code was just updating UI via re-renders.
 
   const handleSeek = useCallback((time: number) => {
-    if (audioRef.current && isController) {
-      audioRef.current.currentTime = time;
+    if (isController) {
+      if (audioRef.current) {
+        audioRef.current.currentTime = time;
+      }
+      seekToTime(time); // Broadcast the seek event
     }
-  }, [isController]);
+  }, [isController, seekToTime]);
 
   const handleVolumeChange = useCallback((newVolume: number) => {
     setVolume(newVolume);

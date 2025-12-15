@@ -6,8 +6,9 @@ const { v4: uuidv4 } = require("uuid");
 
 class FileUploadService {
   constructor() {
-    // Always resolve to the project uploads folder: <project>/uploads
-    this.uploadDir = path.join(__dirname, "../../../uploads");
+    // __dirname is server/services, go up twice to reach project root, then into uploads
+    this.uploadDir = path.resolve(__dirname, "..", "..", "uploads");
+    console.log("FileUploadService uploadDir:", this.uploadDir);
     this.setupStorage();
     this.ensureUploadDirectory();
   }

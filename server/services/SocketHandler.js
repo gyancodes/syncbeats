@@ -219,12 +219,15 @@ class SocketHandler {
     const { roomId, track } = data;
     const room = this.roomManager.getRoom(roomId);
     if (room) {
-      room.playlist.push(track);
-      if (!room.currentTrack) {
-        room.currentTrack = track;
+      // Prevent duplicates by id or url
+      const exists = room.playlist.some((t) => t.id === track.id || t.url === track.url);
+      if (!exists) {
+        room.playlist.push(track);
+        if (!room.currentTrack) {
+          room.currentTrack = track;
+        }
       }
       this.io.to(roomId).emit("playlistUpdate", room.playlist);
-      this.io.to(roomId).emit("trackAdded", track);
     }
   }
 
@@ -276,13 +279,14 @@ class SocketHandler {
       
       const room = this.roomManager.getRoom(roomId);
       if (room) {
-        room.playlist.push(track);
-        if (!room.currentTrack) {
-          room.currentTrack = track;
+        const exists = room.playlist.some((t) => t.id === track.id || t.url === track.url);
+        if (!exists) {
+          room.playlist.push(track);
+          if (!room.currentTrack) {
+            room.currentTrack = track;
+          }
         }
         this.io.to(roomId).emit("playlistUpdate", room.playlist);
-        this.io.to(roomId).emit("trackAdded", track);
-        socket.emit("youtubeTrackAdded", { track, roomId });
       }
     } catch (error) {
       console.error("YouTube track add error:", error);

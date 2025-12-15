@@ -60,6 +60,8 @@ interface SyncBeatsState {
   pauseMusic: () => void;
   setVolume: (volume: number) => void;
   seekToTime: (time: number) => void;
+  syncPlaybackTime: (time: number) => void;
+  updateCurrentTime: (time: number) => void;
   playTrack: (index: number) => void;
   removeTrack: (trackId: string) => void;
   uploadFile: (file: File) => void;
@@ -91,6 +93,10 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
 
   // Actions
   initializeSocket: () => {
+    // Guard against creating multiple sockets (React StrictMode calls effects twice)
+    if (get().socket) {
+      return;
+    }
     const socket = io('http://localhost:3001');
     
     socket.on('connect', () => {
@@ -106,8 +112,15 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
     });
 
     socket.on('roomState', (roomState: any) => {
+      const incoming = roomState.playlist || [];
+      const map = new Map<string, Track>();
+      incoming.forEach(t => {
+        const key = (t.url && t.url.length > 0) ? t.url : t.id;
+        if (!map.has(key)) map.set(key, t);
+      });
+      const deduped = Array.from(map.values());
       set({
-        playlist: roomState.playlist || [],
+        playlist: deduped,
         isPlaying: roomState.isPlaying || false,
         volume: roomState.volume || 1,
         isController: roomState.controller === socket.id,
@@ -133,8 +146,13 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
     });
 
     socket.on('playlistUpdate', (playlist: Track[]) => {
-      // Source of truth comes from server; avoid local appends to prevent duplicates
-      set({ playlist });
+      // Source of truth comes from server; dedupe by url first, then id
+      const map = new Map<string, Track>();
+      playlist.forEach(t => {
+        const key = (t.url && t.url.length > 0) ? t.url : t.id;
+        if (!map.has(key)) map.set(key, t);
+      });
+      set({ playlist: Array.from(map.values()) });
     });
 
     socket.on('trackChanged', (track: Track) => {
@@ -207,6 +225,8 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
     if (socket && currentRoom) {
       // Let the server grant control if none exists; it will deny if someone else controls
       socket.emit('play', currentRoom);
+      // Optimistic UI update to start local playback immediately
+      set({ isPlaying: true });
     }
   },
 
@@ -214,6 +234,8 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
     const { socket, currentRoom } = get();
     if (socket && currentRoom) {
       socket.emit('pause', currentRoom);
+      // Optimistic UI update to stop local playback immediately
+      set({ isPlaying: false });
     }
   },
 
@@ -233,10 +255,26 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
     }
   },
 
+  syncPlaybackTime: (time: number) => {
+    const { socket, currentRoom } = get();
+    // Update local state less aggressively or identical to seek? 
+    // Actually we just want to broadcast. Local state update is fine.
+    set({ currentTime: time });
+    if (socket && currentRoom) {
+      socket.emit('syncTime', { roomId: currentRoom, time });
+    }
+  },
+
+  updateCurrentTime: (time: number) => {
+    set({ currentTime: time });
+  },
+
   playTrack: (index: number) => {
     const { socket, currentRoom, playlist } = get();
     if (socket && currentRoom && playlist[index]) {
       socket.emit('changeTrack', { roomId: currentRoom, trackIndex: index });
+      // Immediately request play so selecting a track starts playback
+      socket.emit('play', currentRoom);
     }
   },
 
@@ -262,10 +300,12 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
       const result = await response.json();
 
       if (result.success) {
+        const fileUrl: string = result.fileUrl;
+        const filenameFromUrl = (fileUrl || '').split('/').pop() || (Date.now() + '-' + Math.random());
         const track: Track = {
-          id: Date.now() + Math.random().toString(),
+          id: filenameFromUrl,
           name: file.name,
-          url: `http://localhost:3001${result.fileUrl}`,
+          url: `http://localhost:3001${fileUrl}`,
           size: result.size,
           type: file.type,
         };
@@ -306,4 +346,3 @@ export const useSyncBeatsStore = create<SyncBeatsState>((set, get) => ({
     set({ showSharingModal: false });
   },
 }));
-

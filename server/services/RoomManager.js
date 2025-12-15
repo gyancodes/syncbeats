@@ -28,7 +28,7 @@ class RoomManager {
 
     // Generate share link if not exists
     if (!this.roomLinks.has(roomId)) {
-      const shareLink = `http://localhost:3002/join/${roomId}`;
+      const shareLink = `http://localhost:3000/?room=${roomId}`;
       this.roomLinks.set(roomId, shareLink);
     }
 
@@ -77,7 +77,7 @@ class RoomManager {
   }
 
   getShareLink(roomId) {
-    return this.roomLinks.get(roomId) || `http://localhost:3002/join/${roomId}`;
+    return this.roomLinks.get(roomId) || `http://localhost:3000/?room=${roomId}`;
   }
 
   getAllRooms() {

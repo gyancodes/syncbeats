@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileAudio, X } from 'lucide-react';
+import { Upload, FileAudio } from 'lucide-react';
 import { useSyncBeatsStore } from '../store/syncBeatsStore';
 
 export default function UploadSection() {
@@ -88,7 +88,14 @@ export default function UploadSection() {
             </p>
           </div>
 
-          <button className="btn btn-primary" disabled={!currentRoom}>
+          <button 
+            className="btn btn-primary" 
+            disabled={!currentRoom}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (currentRoom) fileInputRef.current?.click();
+            }}
+          >
             <Upload className="w-4 h-4 mr-2" />
             Choose Files
           </button>
@@ -121,6 +128,7 @@ export default function UploadSection() {
     </motion.div>
   );
 }
+
 
 
 
