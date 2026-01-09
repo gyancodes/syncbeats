@@ -1,93 +1,133 @@
-// SyncBeats Server - Main Entry Point
 const express = require("express");
 const http = require("http");
-const socketIo = require("socket.io");
+const { Server } = require("socket.io");
 const cors = require("cors");
-const path = require("path");
-const { SocketHandler } = require("./services/SocketHandler");
-const { FileUploadService } = require("./services/FileUploadService");
-const { YouTubeService } = require("./services/YouTubeService");
+const roomManager = require("./roomManager");
+const { registerSyncHandlers } = require("./syncHandler");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
+
+const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
     methods: ["GET", "POST"],
-    credentials: true,
   },
 });
 
-// Initialize services
-const fileUploadService = new FileUploadService();
-const youtubeService = new YouTubeService();
-
-// Middleware
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 
-// Set Content Security Policy headers
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: blob: https:; " +
-    "connect-src 'self' ws: wss: http: https:; " +
-    "media-src 'self' blob: data: https:; " +
-    "font-src 'self' data:;"
-  );
-  next();
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", timestamp: Date.now() });
 });
 
-// Initialize socket handler
-const socketHandler = new SocketHandler(io);
-socketHandler.initialize();
+// Socket.IO connection handling
+io.on("connection", (socket) => {
+  console.log(`User connected: ${socket.id}`);
 
-// Serve uploads statically to support range/HEAD requests from audio elements
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+  let currentRoom = null;
+  let userName = null;
 
-// API Routes
-app.post("/upload", fileUploadService.getUploadMiddleware(), (req, res) => {
-  fileUploadService.handleUpload(req, res);
-});
+  // Create a new room
+  socket.on("room:create", (data, callback) => {
+    userName = data.userName || "Anonymous";
+    const room = roomManager.createRoom(socket.id, userName);
 
-app.get("/uploads/:filename", (req, res) => {
-  fileUploadService.handleFileRequest(req, res);
-});
+    currentRoom = room.code;
+    socket.join(room.code);
+    roomManager.addUserToRoom(room.code, socket.id, userName);
 
-// YouTube API endpoint
-app.get("/api/youtube/:videoId", async (req, res) => {
-  try {
-    const { videoId } = req.params;
-    const result = await youtubeService.getStreamUrl(videoId);
-    res.json({
-      success: true,
-      url: result.url,
-      title: result.title,
+    console.log(`Room created: ${room.code} by ${userName}`);
+
+    if (callback) {
+      callback({
+        success: true,
+        roomCode: room.code,
+        users: roomManager.getRoomUsers(room.code),
+      });
+    }
+  });
+
+  // Join an existing room
+  socket.on("room:join", (data, callback) => {
+    const { roomCode, userName: name } = data;
+    userName = name || "Anonymous";
+
+    const room = roomManager.getRoom(roomCode);
+
+    if (!room) {
+      if (callback) {
+        callback({ success: false, error: "Room not found" });
+      }
+      return;
+    }
+
+    currentRoom = roomCode.toUpperCase();
+    socket.join(currentRoom);
+    roomManager.addUserToRoom(currentRoom, socket.id, userName);
+
+    const users = roomManager.getRoomUsers(currentRoom);
+    const playbackState = roomManager.getPlaybackState(currentRoom);
+
+    console.log(`${userName} joined room: ${currentRoom}`);
+
+    // Notify others in the room
+    socket.to(currentRoom).emit("room:user-joined", {
+      user: { id: socket.id, name: userName },
+      users: users,
     });
-  } catch (error) {
-    console.error("YouTube API error:", error);
-    res.status(500).json({ error: "Failed to get YouTube audio URL" });
+
+    if (callback) {
+      callback({
+        success: true,
+        roomCode: currentRoom,
+        users: users,
+        playbackState: playbackState,
+      });
+    }
+  });
+
+  // Leave room
+  socket.on("room:leave", () => {
+    if (currentRoom) {
+      handleLeaveRoom();
+    }
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log(`User disconnected: ${socket.id}`);
+    if (currentRoom) {
+      handleLeaveRoom();
+    }
+  });
+
+  function handleLeaveRoom() {
+    const room = roomManager.removeUserFromRoom(currentRoom, socket.id);
+    socket.leave(currentRoom);
+
+    if (room) {
+      const users = roomManager.getRoomUsers(currentRoom);
+      io.to(currentRoom).emit("room:user-left", {
+        userId: socket.id,
+        users: users,
+      });
+      console.log(`${userName} left room: ${currentRoom}`);
+    } else {
+      console.log(`Room ${currentRoom} closed (empty)`);
+    }
+
+    currentRoom = null;
   }
-});
 
-// Serve static files from build directory
-app.use(express.static(path.join(__dirname, "../dist")));
-
-// Serve React app for all non-API routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist/index.html"));
+  // Register sync handlers
+  registerSyncHandlers(io, socket);
 });
 
 const PORT = process.env.PORT || 3001;
+
 server.listen(PORT, () => {
-  console.log(`SyncBeats server running on port ${PORT}`);
-  console.log(`Open http://localhost:${PORT} in your browser`);
+  console.log(`🎵 SyncBeats server running on port ${PORT}`);
 });
