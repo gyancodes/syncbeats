@@ -17,10 +17,8 @@ function MusicPlayer({
   const [volume, setVolume] = useState(0.7);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Sync playback state
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return;
-
     if (isPlaying) {
       audioRef.current.play().catch(console.error);
     } else {
@@ -28,29 +26,23 @@ function MusicPlayer({
     }
   }, [isPlaying, currentTrack]);
 
-  // Sync time when receiving external seek
   useEffect(() => {
     if (!audioRef.current || isSyncing) return;
-
     const diff = Math.abs(audioRef.current.currentTime - currentTime);
     if (diff > 1) {
       audioRef.current.currentTime = currentTime;
     }
   }, [currentTime, isSyncing]);
 
-  // Load new track
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return;
-
     audioRef.current.src = currentTrack.url;
     audioRef.current.load();
-
     if (isPlaying) {
       audioRef.current.play().catch(console.error);
     }
   }, [currentTrack?.id]);
 
-  // Update volume
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
@@ -71,11 +63,9 @@ function MusicPlayer({
 
   const handleProgressClick = (e) => {
     if (!progressRef.current || !duration) return;
-
     const rect = progressRef.current.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
     const newTime = percent * duration;
-
     audioRef.current.currentTime = newTime;
     onSeek(newTime);
   };
@@ -101,8 +91,8 @@ function MusicPlayer({
     return (
       <div className="music-player empty">
         <div className="empty-state">
-          <span className="empty-icon">🎵</span>
-          <p>Select a track to start listening</p>
+          <span className="empty-icon">||</span>
+          <p>Select a track to start</p>
         </div>
       </div>
     );
@@ -117,12 +107,9 @@ function MusicPlayer({
         onEnded={() => onPause(0)}
       />
 
-      {/* Track Info */}
       <div className="player-track-info">
         <div className="player-cover">
-          <span className={isPlaying ? "animate-pulse" : ""}>
-            {currentTrack.cover}
-          </span>
+          <span>{currentTrack.title.charAt(0)}</span>
         </div>
         <div className="player-details">
           <h4 className="player-title">{currentTrack.title}</h4>
@@ -130,7 +117,6 @@ function MusicPlayer({
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="player-progress-container">
         <span className="time-display">{formatTime(localTime)}</span>
         <div
@@ -144,7 +130,6 @@ function MusicPlayer({
         <span className="time-display">{formatTime(duration)}</span>
       </div>
 
-      {/* Controls */}
       <div className="player-controls">
         <button
           className="btn btn-icon control-btn"
@@ -156,14 +141,14 @@ function MusicPlayer({
           }}
           title="Rewind 10s"
         >
-          ⏪
+          &lt;&lt;
         </button>
 
         <button
           className="btn btn-icon btn-icon-lg control-btn play-btn"
           onClick={handlePlayPause}
         >
-          {isPlaying ? "⏸️" : "▶️"}
+          {isPlaying ? "||" : ">"}
         </button>
 
         <button
@@ -176,17 +161,13 @@ function MusicPlayer({
           }}
           title="Forward 10s"
         >
-          ⏩
+          &gt;&gt;
         </button>
       </div>
 
-      {/* Volume */}
       <div className="player-volume">
-        <button
-          className="btn btn-icon volume-btn"
-          onClick={() => setIsMuted(!isMuted)}
-        >
-          {isMuted || volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊"}
+        <button className="volume-btn" onClick={() => setIsMuted(!isMuted)}>
+          {isMuted || volume === 0 ? "M" : "V"}
         </button>
         <input
           type="range"

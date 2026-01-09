@@ -1,5 +1,4 @@
 // Demo tracks using free/royalty-free audio
-// Using sample audio files from free sources
 export const tracks = [
   {
     id: 1,
@@ -7,7 +6,6 @@ export const tracks = [
     artist: "SyncBeats Studio",
     duration: "3:24",
     url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    cover: "🎵",
   },
   {
     id: 2,
@@ -15,7 +13,6 @@ export const tracks = [
     artist: "SyncBeats Studio",
     duration: "4:15",
     url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    cover: "🌅",
   },
   {
     id: 3,
@@ -23,7 +20,6 @@ export const tracks = [
     artist: "SyncBeats Studio",
     duration: "3:58",
     url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    cover: "🌙",
   },
   {
     id: 4,
@@ -31,7 +27,6 @@ export const tracks = [
     artist: "SyncBeats Studio",
     duration: "4:42",
     url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-    cover: "⚡",
   },
   {
     id: 5,
@@ -39,7 +34,6 @@ export const tracks = [
     artist: "SyncBeats Studio",
     duration: "3:36",
     url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-    cover: "🌊",
   },
   {
     id: 6,
@@ -47,6 +41,5 @@ export const tracks = [
     artist: "SyncBeats Studio",
     duration: "4:08",
     url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-    cover: "🏙️",
   },
 ];

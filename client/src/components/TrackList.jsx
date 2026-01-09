@@ -3,9 +3,9 @@ import "./TrackList.css";
 function TrackList({ tracks, currentTrack, onTrackSelect }) {
   return (
     <div className="track-list">
-      <h3 className="track-list-title">Available Tracks</h3>
+      <h3 className="track-list-title">Local Tracks</h3>
       <div className="tracks-container">
-        {tracks.map((track) => (
+        {tracks.map((track, index) => (
           <div
             key={track.id}
             className={`track-item ${
@@ -13,7 +13,9 @@ function TrackList({ tracks, currentTrack, onTrackSelect }) {
             }`}
             onClick={() => onTrackSelect(track)}
           >
-            <div className="track-cover">{track.cover}</div>
+            <div className="track-cover">
+              {String(index + 1).padStart(2, "0")}
+            </div>
             <div className="track-info">
               <span className="track-title">{track.title}</span>
               <span className="track-artist">{track.artist}</span>

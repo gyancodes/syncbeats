@@ -4,6 +4,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const roomManager = require("./roomManager");
 const { registerSyncHandlers } = require("./syncHandler");
+const { searchVideos } = require("./youtubeService");
 
 const app = express();
 const server = http.createServer(app);
@@ -23,6 +24,20 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: Date.now() });
 });
 
+// YouTube search endpoint
+app.get("/api/youtube/search", async (req, res) => {
+  const { q } = req.query;
+  if (!q) {
+    return res.status(400).json({ error: "Query parameter q is required" });
+  }
+  try {
+    const results = await searchVideos(q);
+    res.json({ results });
+  } catch (error) {
+    console.error("YouTube search error:", error);
+    res.status(500).json({ error: "Search failed" });
+  }
+});
 // Socket.IO connection handling
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
@@ -129,5 +144,5 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => {
-  console.log(`🎵 SyncBeats server running on port ${PORT}`);
+  console.log(`SyncBeats server running on port ${PORT}`);
 });

@@ -2,8 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: var(--space-lg);
-  gap: var(--space-lg);
+  padding: var(--space-md);
+  gap: var(--space-md);
 }
 
 /* Header */
@@ -11,8 +11,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md) var(--space-xl);
-  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
 }
 
 .room-info {
@@ -22,8 +24,9 @@
 }
 
 .room-info h2 {
-  font-size: 1.5rem;
-  margin: 0;
+  font-size: 1rem;
+  color: var(--accent-primary);
+  letter-spacing: 0.1em;
 }
 
 .room-code-display {
@@ -32,24 +35,25 @@
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-normal);
 }
 
 .room-code-display:hover {
-  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--accent-primary);
 }
 
 .room-label {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }
 
 .room-code {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.2em;
   color: var(--accent-primary);
@@ -57,8 +61,8 @@
 }
 
 .copy-icon {
-  font-size: 0.875rem;
-  opacity: 0.7;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .header-actions {
@@ -71,18 +75,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  color: #f87171;
+  padding: var(--space-xs) var(--space-md);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
 }
 
 .connection-badge.connected {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.3);
-  color: #22c55e;
+  color: var(--accent-primary);
 }
 
 .connection-badge .status-dot {
@@ -96,28 +97,52 @@
 .room-main {
   flex: 1;
   display: grid;
-  grid-template-columns: 300px 1fr 280px;
-  gap: var(--space-lg);
+  grid-template-columns: 320px 1fr 260px;
+  gap: var(--space-md);
   min-height: 0;
 }
 
 .room-sidebar {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   padding: var(--space-lg);
-  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.room-sidebar.left {
-  min-height: 0;
-}
-
 .room-center {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
-  justify-content: center;
+  gap: var(--space-md);
+}
+
+/* Source Tabs */
+.source-tabs {
+  display: flex;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.source-tab {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.source-tab.active {
+  background: var(--accent-primary);
+  color: #000000;
 }
 
 /* Sync Indicator */
@@ -126,16 +151,15 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: var(--space-md);
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  padding: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .sync-icon {
-  animation: spin 2s linear infinite;
+  color: var(--accent-primary);
 }
 
 /* Responsive */
@@ -147,7 +171,7 @@
 
   .room-sidebar.left {
     order: 2;
-    max-height: 300px;
+    max-height: 280px;
   }
 
   .room-center {
@@ -160,10 +184,6 @@
 }
 
 @media (max-width: 640px) {
-  .room-page {
-    padding: var(--space-md);
-  }
-
   .room-header {
     flex-direction: column;
     gap: var(--space-md);
@@ -178,9 +198,5 @@
   .header-actions {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .room-sidebar {
-    padding: var(--space-md);
   }
 }

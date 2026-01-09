@@ -6,13 +6,12 @@
 }
 
 .track-list-title {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: var(--space-md);
-  padding: 0 var(--space-sm);
 }
 
 .tracks-container {
@@ -28,32 +27,34 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md);
-  background: var(--glass-bg);
+  background: var(--bg-tertiary);
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-normal);
 }
 
 .track-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--glass-border);
+  border-color: var(--border-color);
 }
 
 .track-item.active {
-  background: rgba(139, 92, 246, 0.15);
   border-color: var(--accent-primary);
+  background: rgba(255, 215, 0, 0.05);
 }
 
 .track-cover {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-tertiary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  font-size: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  font-weight: 600;
 }
 
 .track-info {
@@ -65,6 +66,7 @@
 }
 
 .track-title {
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
@@ -73,7 +75,7 @@
 }
 
 .track-artist {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -81,23 +83,23 @@
 }
 
 .track-duration {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+  font-family: monospace;
 }
 
 .now-playing-indicator {
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: 20px;
+  height: 16px;
   margin-left: var(--space-sm);
 }
 
 .now-playing-indicator span {
-  width: 3px;
+  width: 2px;
   background: var(--accent-primary);
-  border-radius: 2px;
   animation: equalizer 0.8s ease-in-out infinite;
 }
 

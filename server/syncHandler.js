@@ -74,6 +74,39 @@ function registerSyncHandlers(io, socket) {
       callback(state);
     }
   });
+
+  // YouTube sync handlers
+  socket.on("sync:youtube-play", (data) => {
+    const { roomCode, currentTime } = data;
+    socket.to(roomCode).emit("sync:youtube-play", {
+      currentTime,
+      timestamp: Date.now(),
+    });
+  });
+
+  socket.on("sync:youtube-pause", (data) => {
+    const { roomCode, currentTime } = data;
+    socket.to(roomCode).emit("sync:youtube-pause", {
+      currentTime,
+      timestamp: Date.now(),
+    });
+  });
+
+  socket.on("sync:youtube-seek", (data) => {
+    const { roomCode, currentTime } = data;
+    socket.to(roomCode).emit("sync:youtube-seek", {
+      currentTime,
+      timestamp: Date.now(),
+    });
+  });
+
+  socket.on("sync:youtube-change", (data) => {
+    const { roomCode, video } = data;
+    socket.to(roomCode).emit("sync:youtube-change", {
+      video,
+      timestamp: Date.now(),
+    });
+  });
 }
 
 module.exports = { registerSyncHandlers };

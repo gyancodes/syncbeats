@@ -78,37 +78,22 @@ function Home() {
         {/* Hero Section */}
         <div className="hero animate-fadeIn">
           <div className="logo-container">
-            <div className="logo animate-float">
-              <div className="vinyl">
-                <div className="vinyl-inner"></div>
-                <div className="vinyl-center"></div>
-              </div>
-              <div className="sound-waves">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
+            <div className="logo">
+              <span className="logo-icon">S</span>
             </div>
           </div>
-          <h1>SyncBeats</h1>
-          <p className="tagline">Listen together, anywhere</p>
+          <h1>SYNCBEATS</h1>
+          <p className="tagline">Listen Together</p>
         </div>
 
         {/* Connection Status */}
-        <div
-          className={`connection-status ${
-            isConnected ? "connected" : "disconnected"
-          }`}
-        >
+        <div className={`connection-status ${isConnected ? "connected" : ""}`}>
           <span className="status-dot"></span>
           {isConnected ? "Connected" : "Connecting..."}
         </div>
 
         {/* Main Card */}
-        <div
-          className="home-card glass animate-fadeIn"
-          style={{ animationDelay: "0.2s" }}
-        >
+        <div className="home-card animate-fadeIn">
           {/* Name Input */}
           <div className="input-group">
             <label htmlFor="userName">Your Name</label>
@@ -145,7 +130,6 @@ function Home() {
           </div>
 
           {isJoining ? (
-            /* Join Room Section */
             <div className="action-section">
               <div className="input-group">
                 <label htmlFor="roomCode">Room Code</label>
@@ -153,7 +137,7 @@ function Home() {
                   id="roomCode"
                   type="text"
                   className="input room-code-input"
-                  placeholder="Enter 6-character code"
+                  placeholder="------"
                   value={roomCode}
                   onChange={(e) => {
                     setRoomCode(e.target.value.toUpperCase());
@@ -167,23 +151,19 @@ function Home() {
                 onClick={handleJoinRoom}
                 disabled={!isConnected}
               >
-                <span className="btn-icon-left">🎧</span>
                 Join Room
               </button>
             </div>
           ) : (
-            /* Create Room Section */
             <div className="action-section">
               <p className="action-description">
-                Create a room and invite your friends to listen together in
-                perfect sync.
+                Create a room and share the code with friends.
               </p>
               <button
                 className="btn btn-primary action-btn"
                 onClick={handleCreateRoom}
                 disabled={!isConnected}
               >
-                <span className="btn-icon-left">🎵</span>
                 Create Room
               </button>
             </div>
@@ -191,21 +171,18 @@ function Home() {
         </div>
 
         {/* Features */}
-        <div
-          className="features animate-fadeIn"
-          style={{ animationDelay: "0.4s" }}
-        >
+        <div className="features animate-fadeIn">
           <div className="feature">
-            <span className="feature-icon">🎵</span>
-            <span>Synchronized Playback</span>
+            <div className="feature-icon">S</div>
+            <span>Sync</span>
           </div>
           <div className="feature">
-            <span className="feature-icon">👥</span>
-            <span>Real-time Presence</span>
+            <div className="feature-icon">Y</div>
+            <span>YouTube</span>
           </div>
           <div className="feature">
-            <span className="feature-icon">⚡</span>
-            <span>Low Latency</span>
+            <div className="feature-icon">L</div>
+            <span>Live</span>
           </div>
         </div>
       </div>
