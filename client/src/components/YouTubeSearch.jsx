@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./YouTubeSearch.css";
 
-const API_URL = "https://b7b3476ece72.ngrok-free.app";
+const API_URL = "";
 
 function YouTubeSearch({ onVideoSelect, currentVideo }) {
   const [query, setQuery] = useState("");

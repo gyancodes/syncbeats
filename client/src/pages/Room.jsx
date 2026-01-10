@@ -118,7 +118,7 @@ function Room() {
       setActiveSource("youtube");
     });
 
-    if (location.state?.isHost) {
+    if (location.state?.isHost && socket?.id) {
       setUsers([{ id: socket.id, name: userName }]);
     }
 

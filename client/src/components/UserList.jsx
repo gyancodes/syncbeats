@@ -9,7 +9,7 @@ function UserList({ users, currentUserId }) {
       <div className="users-container">
         {users.map((user, index) => (
           <div
-            key={user.id}
+            key={user.id || `user-${index}`}
             className={`user-item ${user.id === currentUserId ? "is-you" : ""}`}
             style={{ animationDelay: `${index * 0.1}s` }}
           >

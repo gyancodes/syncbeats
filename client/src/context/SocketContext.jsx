@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 
 const SocketContext = createContext(null);
 
-const SOCKET_URL = "https://b7b3476ece72.ngrok-free.app";
+const SOCKET_URL = "/";
 
 export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
