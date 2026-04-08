@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 
 const SocketContext = createContext(null);
 
-const SOCKET_URL = import.meta.env.VITE_SERVER_URL || "/";
+const SOCKET_URL = import.meta.env.VITE_SERVER_URL || "";
 
 export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
@@ -11,11 +11,10 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     const socketInstance = io(SOCKET_URL, {
-      autoConnect: true,
+      transports: ["polling", "websocket"],
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
       reconnectionDelay: 1000,
-      transports: ["websocket", "polling"],
     });
 
     socketInstance.on("connect", () => {

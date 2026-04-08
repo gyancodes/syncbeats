@@ -11,14 +11,16 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: ["https://syncbeats-black.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true,
   },
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 app.use(cors({
-  origin: "*",
+  origin: ["https://syncbeats-black.vercel.app", "http://localhost:5173"],
   credentials: true,
 }));
 app.use(express.json());
