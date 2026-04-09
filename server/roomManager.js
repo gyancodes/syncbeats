@@ -22,6 +22,9 @@ function createRoom(hostId, hostName) {
     currentTrack: null,
     isPlaying: false,
     currentTime: 0,
+    youtubeVideo: null,
+    youtubeIsPlaying: false,
+    youtubeCurrentTime: 0,
     lastUpdate: Date.now(),
     createdAt: Date.now(),
   };
@@ -96,6 +99,9 @@ function updatePlaybackState(roomCode, state) {
   if (state.currentTrack !== undefined) room.currentTrack = state.currentTrack;
   if (state.isPlaying !== undefined) room.isPlaying = state.isPlaying;
   if (state.currentTime !== undefined) room.currentTime = state.currentTime;
+  if (state.youtubeVideo !== undefined) room.youtubeVideo = state.youtubeVideo;
+  if (state.youtubeIsPlaying !== undefined) room.youtubeIsPlaying = state.youtubeIsPlaying;
+  if (state.youtubeCurrentTime !== undefined) room.youtubeCurrentTime = state.youtubeCurrentTime;
   room.lastUpdate = Date.now();
 
   return room;
@@ -112,6 +118,9 @@ function getPlaybackState(roomCode) {
     currentTrack: room.currentTrack,
     isPlaying: room.isPlaying,
     currentTime: room.currentTime,
+    youtubeVideo: room.youtubeVideo,
+    youtubeIsPlaying: room.youtubeIsPlaying,
+    youtubeCurrentTime: room.youtubeCurrentTime,
     lastUpdate: room.lastUpdate,
   };
 }

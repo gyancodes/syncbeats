@@ -44,6 +44,8 @@ function Room() {
         isPlaying: playing,
         currentTime: time,
         youtubeVideo,
+        youtubeIsPlaying: ytPlaying,
+        youtubeCurrentTime: ytTime,
         source,
       } = location.state.playbackState;
       if (track) {
@@ -53,6 +55,8 @@ function Room() {
       }
       if (youtubeVideo) {
         setCurrentVideo(youtubeVideo);
+        setYtIsPlaying(ytPlaying || false);
+        setYtCurrentTime(ytTime || 0);
         setActiveSource("youtube");
       }
       if (source) {
@@ -116,6 +120,23 @@ function Room() {
       setYtCurrentTime(0);
       setYtIsPlaying(true);
       setActiveSource("youtube");
+    });
+
+    // Request current state from server (fallback if not passed via navigation)
+    socket.emit("sync:get-state", { roomCode }, (state) => {
+      if (state) {
+        if (state.currentTrack) {
+          setCurrentTrack(state.currentTrack);
+          setIsPlaying(state.isPlaying);
+          setCurrentTime(state.currentTime);
+        }
+        if (state.youtubeVideo) {
+          setCurrentVideo(state.youtubeVideo);
+          setYtIsPlaying(state.youtubeIsPlaying);
+          setYtCurrentTime(state.youtubeCurrentTime);
+          setActiveSource("youtube");
+        }
+      }
     });
 
     if (location.state?.isHost && socket?.id) {

@@ -78,6 +78,12 @@ function registerSyncHandlers(io, socket) {
   // YouTube sync handlers
   socket.on("sync:youtube-play", (data) => {
     const { roomCode, currentTime } = data;
+
+    roomManager.updatePlaybackState(roomCode, {
+      youtubeIsPlaying: true,
+      youtubeCurrentTime: currentTime,
+    });
+
     socket.to(roomCode).emit("sync:youtube-play", {
       currentTime,
       timestamp: Date.now(),
@@ -86,6 +92,12 @@ function registerSyncHandlers(io, socket) {
 
   socket.on("sync:youtube-pause", (data) => {
     const { roomCode, currentTime } = data;
+
+    roomManager.updatePlaybackState(roomCode, {
+      youtubeIsPlaying: false,
+      youtubeCurrentTime: currentTime,
+    });
+
     socket.to(roomCode).emit("sync:youtube-pause", {
       currentTime,
       timestamp: Date.now(),
@@ -94,6 +106,11 @@ function registerSyncHandlers(io, socket) {
 
   socket.on("sync:youtube-seek", (data) => {
     const { roomCode, currentTime } = data;
+
+    roomManager.updatePlaybackState(roomCode, {
+      youtubeCurrentTime: currentTime,
+    });
+
     socket.to(roomCode).emit("sync:youtube-seek", {
       currentTime,
       timestamp: Date.now(),
@@ -102,6 +119,13 @@ function registerSyncHandlers(io, socket) {
 
   socket.on("sync:youtube-change", (data) => {
     const { roomCode, video } = data;
+
+    roomManager.updatePlaybackState(roomCode, {
+      youtubeVideo: video,
+      youtubeCurrentTime: 0,
+      youtubeIsPlaying: true,
+    });
+
     socket.to(roomCode).emit("sync:youtube-change", {
       video,
       timestamp: Date.now(),
