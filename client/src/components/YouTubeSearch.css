@@ -31,6 +31,17 @@
   font-size: 0.75rem;
 }
 
+.search-help {
+  margin: 0 0 var(--space-md);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.search-help code {
+  font-size: 0.68rem;
+}
+
 .search-results {
   flex: 1;
   overflow-y: auto;

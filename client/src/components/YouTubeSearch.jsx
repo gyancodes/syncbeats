@@ -11,15 +11,21 @@ function YouTubeSearch({ onVideoSelect, currentVideo }) {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
 
     setIsLoading(true);
     setHasSearched(true);
 
     try {
       const response = await fetch(
-        `${API_URL}/api/youtube/search?q=${encodeURIComponent(query)}`
+        `${API_URL}/api/youtube/search?q=${encodeURIComponent(trimmedQuery)}`
       );
+
+      if (!response.ok) {
+        throw new Error(`Search request failed: ${response.status}`);
+      }
+
       const data = await response.json();
       setResults(data.results || []);
     } catch (error) {
@@ -38,7 +44,7 @@ function YouTubeSearch({ onVideoSelect, currentVideo }) {
         <input
           type="text"
           className="input search-input"
-          placeholder="Search for music..."
+          placeholder="Search, paste YouTube link, or video ID..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -51,11 +57,19 @@ function YouTubeSearch({ onVideoSelect, currentVideo }) {
         </button>
       </form>
 
+      <p className="search-help">
+        Works with API search or direct YouTube URLs like
+        {" "}
+        <code>youtu.be/...</code>
+      </p>
+
       <div className="search-results">
         {isLoading && <div className="search-loading">Searching...</div>}
 
         {!isLoading && hasSearched && results.length === 0 && (
-          <div className="search-empty">No results found</div>
+          <div className="search-empty">
+            No results found. Try a YouTube link or video ID.
+          </div>
         )}
 
         {!isLoading &&
